@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../app/router/enrutador.dart';
 import '../../../../app/theme/colores.dart';
-
-enum CategoriaNegocioVista { barberia, salonBelleza }
+import '../modelos_vista/datos_negocios_mock.dart';
+import '../modelos_vista/negocio_vista.dart';
 
 class VistaNegocios extends StatefulWidget {
   const VistaNegocios({
@@ -20,7 +22,6 @@ class VistaNegocios extends StatefulWidget {
 class _VistaNegociosState extends State<VistaNegocios> {
   final TextEditingController _busquedaCtrl = TextEditingController();
   CategoriaNegocioVista _categoriaActiva = CategoriaNegocioVista.barberia;
-  String? _negocioSeleccionadoId;
 
   @override
   void dispose() {
@@ -31,7 +32,7 @@ class _VistaNegociosState extends State<VistaNegocios> {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final negociosCategoria = _negocios
+    final negociosCategoria = negociosMockVista
         .where((negocio) => negocio.categoria == _categoriaActiva)
         .toList();
 
@@ -42,18 +43,16 @@ class _VistaNegociosState extends State<VistaNegocios> {
             final coincideNegocio =
                 negocio.nombre.toLowerCase().contains(busqueda);
             final coincideBarbero = negocio.barberos.any(
-              (barbero) => barbero.toLowerCase().contains(busqueda),
+              (barbero) =>
+                  barbero.nombre.toLowerCase().contains(busqueda) ||
+                  barbero.especialidades
+                      .any((estilo) => estilo.toLowerCase().contains(busqueda)),
             );
             final coincideEstilo = negocio.estilos.any(
               (estilo) => estilo.toLowerCase().contains(busqueda),
             );
             return coincideNegocio || coincideBarbero || coincideEstilo;
           }).toList();
-
-    if (_negocioSeleccionadoId != null &&
-        !resultadosNegocios.any((n) => n.id == _negocioSeleccionadoId)) {
-      _negocioSeleccionadoId = null;
-    }
 
     return SafeArea(
       child: ListView(
@@ -98,15 +97,8 @@ class _VistaNegociosState extends State<VistaNegocios> {
             ...resultadosNegocios.map(
               (negocio) => _TarjetaNegocio(
                 negocio: negocio,
-                estaSeleccionada: _negocioSeleccionadoId == negocio.id,
                 onTap: () {
-                  setState(() {
-                    if (_negocioSeleccionadoId == negocio.id) {
-                      _negocioSeleccionadoId = null;
-                    } else {
-                      _negocioSeleccionadoId = negocio.id;
-                    }
-                  });
+                  context.push('${Rutas.negocios}/${negocio.id}');
                 },
               ),
             ),
@@ -136,7 +128,6 @@ class _VistaNegociosState extends State<VistaNegocios> {
                   setState(() {
                     _categoriaActiva = CategoriaNegocioVista.barberia;
                     _busquedaCtrl.clear();
-                    _negocioSeleccionadoId = null;
                   });
                 },
               ),
@@ -150,7 +141,6 @@ class _VistaNegociosState extends State<VistaNegocios> {
                   setState(() {
                     _categoriaActiva = CategoriaNegocioVista.salonBelleza;
                     _busquedaCtrl.clear();
-                    _negocioSeleccionadoId = null;
                   });
                 },
               ),
@@ -268,12 +258,10 @@ class _BotonCategoria extends StatelessWidget {
 class _TarjetaNegocio extends StatelessWidget {
   const _TarjetaNegocio({
     required this.negocio,
-    required this.estaSeleccionada,
     required this.onTap,
   });
 
-  final _NegocioVista negocio;
-  final bool estaSeleccionada;
+  final NegocioVista negocio;
   final VoidCallback onTap;
 
   @override
@@ -287,11 +275,7 @@ class _TarjetaNegocio extends StatelessWidget {
         decoration: BoxDecoration(
           color: ColoresApp.secundario,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: estaSeleccionada
-                ? ColoresApp.primario
-                : ColoresApp.terceario.withValues(alpha: 0.2),
-          ),
+          border: Border.all(color: ColoresApp.terceario.withValues(alpha: 0.2)),
           boxShadow: [
             BoxShadow(
               color: ColoresApp.terceario.withValues(alpha: 0.12),
@@ -349,24 +333,20 @@ class _TarjetaNegocio extends StatelessWidget {
             _detalleFila(context, Icons.build_outlined, 'Servicios', negocio.servicios.join(', ')),
             const SizedBox(height: 4),
             _calificacionConEstrellas(context),
-            if (estaSeleccionada) ...[
-              const SizedBox(height: 10),
-              Text(
-                'Barberos',
-                style: tema.textTheme.labelLarge?.copyWith(
-                  color: ColoresApp.primario,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: ColoresApp.terceario),
+                const SizedBox(width: 4),
+                Text(
+                  'Ver detalles y barberos',
+                  style: tema.textTheme.bodySmall?.copyWith(
+                    color: ColoresApp.textoClaro,
+                    fontSize: 11,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              ...negocio.barberos.map(
-                (barbero) => _TarjetaBarbero(
-                  nombre: barbero,
-                  especialidad: negocio.estilos.join(' • '),
-                ),
-              ),
-            ],
+              ],
+            ),
           ],
         ),
       ),
@@ -449,75 +429,6 @@ class _TarjetaNegocio extends StatelessWidget {
   }
 }
 
-class _TarjetaBarbero extends StatelessWidget {
-  const _TarjetaBarbero({
-    required this.nombre,
-    required this.especialidad,
-  });
-
-  final String nombre;
-  final String especialidad;
-
-  @override
-  Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: ColoresApp.fondo,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: ColoresApp.terceario.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: const BoxDecoration(
-              color: ColoresApp.primario,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.content_cut,
-              size: 14,
-              color: ColoresApp.secundario,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nombre,
-                  style: tema.textTheme.labelLarge?.copyWith(
-                    color: ColoresApp.primario,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  especialidad,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: tema.textTheme.bodySmall?.copyWith(
-                    color: ColoresApp.textoClaro,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _LogoEmpresa extends StatelessWidget {
   const _LogoEmpresa();
 
@@ -553,117 +464,3 @@ class _LogoEmpresa extends StatelessWidget {
   }
 }
 
-class _NegocioVista {
-  const _NegocioVista({
-    required this.id,
-    required this.nombre,
-    required this.categoria,
-    required this.imagenUrl,
-    required this.ubicacion,
-    required this.horarios,
-    required this.servicios,
-    required this.barberos,
-    required this.estilos,
-    required this.calificacion,
-    required this.totalCalificaciones,
-  });
-
-  final String id;
-  final String nombre;
-  final CategoriaNegocioVista categoria;
-  final String imagenUrl;
-  final String ubicacion;
-  final String horarios;
-  final List<String> servicios;
-  final List<String> barberos;
-  final List<String> estilos;
-  final double calificacion;
-  final int totalCalificaciones;
-}
-
-const List<_NegocioVista> _negocios = [
-  _NegocioVista(
-    id: 'neg_001',
-    nombre: 'Barberia Alpha',
-    categoria: CategoriaNegocioVista.barberia,
-    imagenUrl:
-        'https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=1200&q=60',
-    ubicacion: 'Calle 10 #12-30',
-    horarios: 'Lun - Sab 08:00 a 20:00',
-    servicios: ['Corte clasico', 'Barba premium', 'Afeitado tradicional'],
-    barberos: ['Carlos Martinez', 'Andres Mejia'],
-    estilos: ['Fade', 'Low Fade', 'Taper', 'Buzz Cut'],
-    calificacion: 4.8,
-    totalCalificaciones: 215,
-  ),
-  _NegocioVista(
-    id: 'neg_002',
-    nombre: 'Barberia Black',
-    categoria: CategoriaNegocioVista.barberia,
-    imagenUrl:
-        'https://images.unsplash.com/photo-1512690459411-b0fd1c86b8ec?auto=format&fit=crop&w=1200&q=60',
-    ubicacion: 'Av. Central 45-20',
-    horarios: 'Lun - Dom 10:00 a 22:00',
-    servicios: ['Corte moderno', 'Diseno de barba'],
-    barberos: ['Miguel Torres', 'Jairo Lopez'],
-    estilos: ['Mid Fade', 'Pompadour', 'French Crop'],
-    calificacion: 4.6,
-    totalCalificaciones: 142,
-  ),
-  _NegocioVista(
-    id: 'neg_003',
-    nombre: 'Barberia Classic',
-    categoria: CategoriaNegocioVista.barberia,
-    imagenUrl:
-        'https://images.unsplash.com/photo-1503951458645-643d53bfd90f?auto=format&fit=crop&w=1200&q=60',
-    ubicacion: 'Cra. 8 #22-14',
-    horarios: 'Mar - Dom 09:00 a 19:00',
-    servicios: ['Corte ejecutivo', 'Perfilado de barba'],
-    barberos: ['Sebastian Rojas'],
-    estilos: ['Side Part', 'Slick Back', 'Undercut'],
-    calificacion: 4.7,
-    totalCalificaciones: 97,
-  ),
-  _NegocioVista(
-    id: 'neg_004',
-    nombre: 'Barberia X',
-    categoria: CategoriaNegocioVista.barberia,
-    imagenUrl:
-        'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=60',
-    ubicacion: 'Calle 72 #30-11',
-    horarios: 'Lun - Sab 07:00 a 21:00',
-    servicios: ['Corte urbano', 'Lavado capilar'],
-    barberos: ['Juan Camilo Perez', 'David Pineda'],
-    estilos: ['Skin Fade', 'Mullet Fade', 'Crew Cut'],
-    calificacion: 4.5,
-    totalCalificaciones: 61,
-  ),
-  _NegocioVista(
-    id: 'neg_005',
-    nombre: 'Salon Aurora',
-    categoria: CategoriaNegocioVista.salonBelleza,
-    imagenUrl:
-        'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=60',
-    ubicacion: 'Calle 50 #19-07',
-    horarios: 'Lun - Sab 09:00 a 19:00',
-    servicios: ['Peinado', 'Colorimetria', 'Tratamiento capilar'],
-    barberos: ['Laura Castro', 'Paola Marin'],
-    estilos: ['Bob', 'Balayage', 'Pixie'],
-    calificacion: 4.9,
-    totalCalificaciones: 188,
-  ),
-  _NegocioVista(
-    id: 'neg_006',
-    nombre: 'Salon Esencia',
-    categoria: CategoriaNegocioVista.salonBelleza,
-    imagenUrl:
-        'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=60',
-    ubicacion: 'Av. Prado #99-21',
-    horarios: 'Mar - Dom 10:00 a 20:00',
-    servicios: ['Maquillaje', 'Alisado', 'Corte en capas'],
-    barberos: ['Daniela Ruiz'],
-    estilos: ['Shag', 'Lob', 'Butterfly Cut'],
-    calificacion: 4.7,
-    totalCalificaciones: 112,
-  ),
-];

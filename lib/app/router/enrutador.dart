@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/presentacion/paginas/pagina_login.dart';
@@ -6,9 +5,11 @@ import '../../features/auth/presentacion/paginas/pagina_registro.dart';
 import '../../features/auth/presentacion/paginas/pagina_completar_perfil.dart';
 import '../../features/home/presentacion/paginas/pagina_inicio.dart';
 import '../../features/appointments/presentacion/paginas/pagina_citas.dart';
+import '../../features/appointments/presentacion/paginas/pagina_agendar_cita.dart';
 import '../../features/profile/presentacion/paginas/pagina_perfil.dart';
 import '../../features/barbers/presentacion/paginas/pagina_barberos.dart';
 import '../../features/businesses/presentacion/paginas/pagina_negocios.dart';
+import '../../features/businesses/presentacion/paginas/pagina_detalle_negocio.dart';
 import '../../features/payments/presentacion/paginas/pagina_pagos.dart';
 import '../../features/qr/presentacion/paginas/pagina_qr.dart';
 import '../../features/settings/presentacion/paginas/pagina_configuracion.dart';
@@ -24,6 +25,7 @@ abstract class Rutas {
   static const completarPerfil = '/completar-perfil';
   static const inicio = '/inicio';
   static const citas = '/citas';
+  static const agendarCita = '/agendar-cita';
   static const perfil = '/perfil';
   static const barberos = '/barberos';
   static const negocios = '/negocios';
@@ -63,6 +65,23 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const PaginaCitas(),
           ),
           GoRoute(
+            path: Rutas.agendarCita,
+            builder: (context, state) {
+              final negocio = state.uri.queryParameters['negocio'] ?? 'Negocio';
+              final barbero = state.uri.queryParameters['barbero'] ?? 'Barbero';
+              final especialidadesCadena =
+                  state.uri.queryParameters['especialidades'] ?? '';
+              final especialidades = especialidadesCadena.isEmpty
+                  ? <String>[]
+                  : especialidadesCadena.split('|');
+              return PaginaAgendarCita(
+                negocioNombre: negocio,
+                barberoNombre: barbero,
+                especialidades: especialidades,
+              );
+            },
+          ),
+          GoRoute(
             path: Rutas.perfil,
             builder: (context, state) => const PaginaPerfil(),
           ),
@@ -73,6 +92,12 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: Rutas.negocios,
             builder: (context, state) => const PaginaNegocios(),
+          ),
+          GoRoute(
+            path: '${Rutas.negocios}/:id',
+            builder: (context, state) => PaginaDetalleNegocio(
+              negocioId: state.pathParameters['id'] ?? '',
+            ),
           ),
           GoRoute(
             path: Rutas.pagos,
