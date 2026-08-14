@@ -144,8 +144,12 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
       return;
     }
 
+    final marca = DateTime.now().millisecondsSinceEpoch.toString();
+    final codigoQr =
+        'AIONSTYLE|$marca|${widget.negocioNombre}|${widget.barberoNombre}|${_corteSeleccionado!}|$_fechaTexto|$_horaTexto|${_precioSeleccionado.toStringAsFixed(2)}';
+
     context.pushReplacement(
-      '${Rutas.confirmacionCita}?negocio=${Uri.encodeComponent(widget.negocioNombre)}&barbero=${Uri.encodeComponent(widget.barberoNombre)}&corte=${Uri.encodeComponent(_corteSeleccionado!)}&precio=${_precioSeleccionado.toStringAsFixed(2)}&fecha=${Uri.encodeComponent(_fechaTexto)}&hora=${Uri.encodeComponent(_horaTexto)}&pago=${Uri.encodeComponent(_metodoPagoTexto)}',
+      '${Rutas.confirmacionCita}?negocio=${Uri.encodeComponent(widget.negocioNombre)}&barbero=${Uri.encodeComponent(widget.barberoNombre)}&corte=${Uri.encodeComponent(_corteSeleccionado!)}&precio=${_precioSeleccionado.toStringAsFixed(2)}&fecha=${Uri.encodeComponent(_fechaTexto)}&hora=${Uri.encodeComponent(_horaTexto)}&pago=${Uri.encodeComponent(_metodoPagoTexto)}&qr=${Uri.encodeComponent(codigoQr)}',
     );
   }
 

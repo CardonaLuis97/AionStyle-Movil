@@ -1,0 +1,158 @@
+import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+
+import '../../../../app/theme/colores.dart';
+
+class FacturaCitaWidget extends StatelessWidget {
+  const FacturaCitaWidget({
+    super.key,
+    required this.negocioNombre,
+    required this.barberoNombre,
+    required this.corte,
+    required this.precio,
+    required this.fecha,
+    required this.hora,
+    required this.metodoPago,
+    required this.codigoQr,
+  });
+
+  final String negocioNombre;
+  final String barberoNombre;
+  final String corte;
+  final double precio;
+  final String fecha;
+  final String hora;
+  final String metodoPago;
+  final String codigoQr;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: ColoresApp.secundario,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: ColoresApp.terceario.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'FACTURA DE CITA',
+                style: tema.textTheme.labelLarge?.copyWith(
+                  color: ColoresApp.primario,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Text(
+                'AionStyle',
+                style: tema.textTheme.labelMedium?.copyWith(
+                  color: ColoresApp.textoClaro,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          const Divider(height: 1),
+          const SizedBox(height: 10),
+          _linea('Negocio', negocioNombre),
+          _linea('Barbero', barberoNombre),
+          _linea('Corte', corte),
+          _linea('Fecha', fecha),
+          _linea('Hora', hora),
+          _linea('Pago', metodoPago),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: ColoresApp.fondo,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: ColoresApp.terceario.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'TOTAL',
+                  style: tema.textTheme.titleSmall?.copyWith(
+                    color: ColoresApp.primario,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  'USD ${precio.toStringAsFixed(2)}',
+                  style: tema.textTheme.titleSmall?.copyWith(
+                    color: ColoresApp.primario,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: ColoresApp.secundario,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: ColoresApp.terceario.withValues(alpha: 0.2)),
+              ),
+              child: QrImageView(
+                data: codigoQr,
+                size: 190,
+                eyeStyle: const QrEyeStyle(
+                  color: ColoresApp.primario,
+                  eyeShape: QrEyeShape.square,
+                ),
+                dataModuleStyle: const QrDataModuleStyle(
+                  color: ColoresApp.primario,
+                  dataModuleShape: QrDataModuleShape.square,
+                ),
+                backgroundColor: ColoresApp.secundario,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _linea(String etiqueta, String valor) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 7),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              etiqueta,
+              style: const TextStyle(
+                color: ColoresApp.terceario,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              valor,
+              textAlign: TextAlign.end,
+              style: const TextStyle(
+                color: ColoresApp.texto,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

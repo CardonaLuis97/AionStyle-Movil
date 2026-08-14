@@ -64,7 +64,19 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: Rutas.citas,
-            builder: (context, state) => const PaginaCitas(),
+            builder: (context, state) {
+              final p = state.uri.queryParameters;
+              return PaginaCitas(
+                negocioNombre: p['negocio'],
+                barberoNombre: p['barbero'],
+                corte: p['corte'],
+                precio: double.tryParse(p['precio'] ?? ''),
+                fecha: p['fecha'],
+                hora: p['hora'],
+                metodoPago: p['pago'],
+                codigoQr: p['qr'],
+              );
+            },
           ),
           GoRoute(
             path: Rutas.agendarCita,
@@ -96,6 +108,7 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
                 fecha: p['fecha'] ?? 'Sin fecha',
                 hora: p['hora'] ?? 'Sin hora',
                 metodoPago: p['pago'] ?? 'Efectivo',
+                codigoQr: p['qr'] ?? 'AIONSTYLE|SIN_QR',
               );
             },
           ),
