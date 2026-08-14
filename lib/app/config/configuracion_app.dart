@@ -22,6 +22,7 @@ abstract class ConfiguracionApp {
   // Stripe
   static const stripePublicKeyDev = 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXX';
   static const stripePublicKeyProd = 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX';
+  static const googleClientIdWeb = 'dev-web-client-id.apps.googleusercontent.com';
 
   static String get stripePublicKey => entorno == _Entorno.produccion
       ? stripePublicKeyProd

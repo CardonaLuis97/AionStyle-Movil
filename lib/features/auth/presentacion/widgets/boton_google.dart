@@ -8,7 +8,7 @@ class BotonGoogle extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
       onPressed: onPresionado,
-      icon: Image.asset('assets/icons/google.png', height: 20, errorBuilder: (_, __, ___) => const Icon(Icons.g_mobiledata)),
+      icon: const Icon(Icons.g_mobiledata),
       label: const Text('Continuar con Google'),
       style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
     );
