@@ -1,0 +1,83 @@
+name: aionstyle_movil
+description: AionStyle - Aplicación móvil para gestión de barberías y citas.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Estado
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Navegación
+  go_router: ^14.2.7
+
+  # HTTP / API
+  dio: ^5.7.0
+
+  # Modelos e inmutabilidad
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # Almacenamiento seguro
+  flutter_secure_storage: ^9.2.2
+
+  # Autenticación Google
+  google_sign_in: ^6.2.1
+
+  # Lectura QR
+  mobile_scanner: ^5.2.3
+
+  # Pagos con tarjeta
+  flutter_stripe: ^10.2.0
+
+  # Utilidades
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+  intl: ^0.19.0
+  shared_preferences: ^2.3.2
+  connectivity_plus: ^6.0.3
+  logger: ^2.4.0
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+  lottie: ^3.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Generación de código
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  riverpod_generator: ^2.4.3
+
+  # Linting
+  flutter_lints: ^4.0.0
+  custom_lint: ^0.6.7
+  riverpod_lint: ^2.3.13
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+    - assets/fonts/
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
