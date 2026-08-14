@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/enrutador.dart';
-import '../../../../core/extensions/extensiones.dart';
 import '../modelos_vista/estado_auth.dart';
 import '../proveedores/proveedores_auth.dart';
 import '../widgets/campo_email.dart';
@@ -101,6 +100,12 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                 TextButton(
                   onPressed: () => context.push(Rutas.registro),
                   child: const Text('¿No tienes cuenta? Regístrate'),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Demo roles:\nusuarioa@aionstyle.com\nusuariob@aionstyle.com\nusuarioc@aionstyle.com\nusuariod@aionstyle.com',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),

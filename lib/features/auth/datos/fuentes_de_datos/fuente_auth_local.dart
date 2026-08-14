@@ -51,7 +51,9 @@ class FuenteDatosAuthLocalImpl implements FuenteDatosAuthLocal {
     required String contrasena,
   }) async {
     final cuerpo = await _cargarMock('assets/mock_api/auth/login_correo_post.json');
-    return UsuarioModelo.fromJson(cuerpo['usuario'] as Map<String, dynamic>);
+    final usuarioBase =
+        UsuarioModelo.fromJson(cuerpo['usuario'] as Map<String, dynamic>);
+    return _usuarioDemoSegunCorreo(correo, usuarioBase);
   }
 
   @override
@@ -89,5 +91,45 @@ class FuenteDatosAuthLocalImpl implements FuenteDatosAuthLocal {
   @override
   Future<void> cerrarSesion() async {
     // Sin llamada real en mock
+  }
+
+  UsuarioModelo _usuarioDemoSegunCorreo(
+    String correo,
+    UsuarioModelo usuarioBase,
+  ) {
+    final clave = correo.trim().toLowerCase();
+    if (clave == 'usuarioa@aionstyle.com') {
+      return usuarioBase.copyWith(
+        id: 'usr_demo_a',
+        nombreCompleto: 'Usuario A',
+        correo: clave,
+        roles: const ['CLIENTE'],
+      );
+    }
+    if (clave == 'usuariob@aionstyle.com') {
+      return usuarioBase.copyWith(
+        id: 'usr_demo_b',
+        nombreCompleto: 'Usuario B',
+        correo: clave,
+        roles: const ['CLIENTE', 'BARBERO'],
+      );
+    }
+    if (clave == 'usuarioc@aionstyle.com') {
+      return usuarioBase.copyWith(
+        id: 'usr_demo_c',
+        nombreCompleto: 'Usuario C',
+        correo: clave,
+        roles: const ['CLIENTE', 'DUEÑO'],
+      );
+    }
+    if (clave == 'usuariod@aionstyle.com') {
+      return usuarioBase.copyWith(
+        id: 'usr_demo_d',
+        nombreCompleto: 'Usuario D',
+        correo: clave,
+        roles: const ['CLIENTE', 'BARBERO', 'DUEÑO'],
+      );
+    }
+    return usuarioBase;
   }
 }
