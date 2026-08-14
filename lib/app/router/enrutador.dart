@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/presentacion/paginas/pagina_login.dart';
 import '../../features/auth/presentacion/paginas/pagina_registro.dart';
+import '../../features/auth/presentacion/paginas/pagina_completar_perfil.dart';
 import '../../features/home/presentacion/paginas/pagina_inicio.dart';
 import '../../features/appointments/presentacion/paginas/pagina_citas.dart';
 import '../../features/profile/presentacion/paginas/pagina_perfil.dart';
@@ -20,6 +21,7 @@ abstract class Rutas {
   static const splash = '/';
   static const login = '/login';
   static const registro = '/registro';
+  static const completarPerfil = '/completar-perfil';
   static const inicio = '/inicio';
   static const citas = '/citas';
   static const perfil = '/perfil';
@@ -44,6 +46,10 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Rutas.registro,
         builder: (context, state) => const PaginaRegistro(),
+      ),
+      GoRoute(
+        path: Rutas.completarPerfil,
+        builder: (context, state) => const PaginaCompletarPerfil(),
       ),
       ShellRoute(
         builder: (context, state, child) => NavegacionPrincipal(child: child),

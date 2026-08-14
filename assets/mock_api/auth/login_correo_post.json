@@ -1,0 +1,18 @@
+{
+  "estado": "200",
+  "fecha_consumo": "2025-01-01T10:00:00Z",
+  "cuerpo": {
+    "token": "mock_token_correo_abc123",
+    "usuario": {
+      "id": "usr_001",
+      "nombre_completo": "Carlos Rodríguez",
+      "correo": "carlos@ejemplo.com",
+      "telefono": "+57 300 123 4567",
+      "tipo_documento": "DNI",
+      "numero_documento": "12345678",
+      "imagen_perfil": null,
+      "roles": ["CLIENTE"],
+      "proveedor_autenticacion": "CORREO"
+    }
+  }
+}

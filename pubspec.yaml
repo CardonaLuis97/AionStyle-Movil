@@ -70,6 +70,7 @@ flutter:
     - assets/icons/
     - assets/animations/
     - assets/fonts/
+    - assets/mock_api/auth/
 
   fonts:
     - family: Poppins

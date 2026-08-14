@@ -1,0 +1,19 @@
+{
+  "estado": "200",
+  "fecha_consumo": "2025-01-01T10:00:00Z",
+  "cuerpo": {
+    "token": "mock_token_google_xyz789",
+    "perfil_completo": false,
+    "usuario": {
+      "id": "usr_002",
+      "nombre_completo": "María González",
+      "correo": "maria.gonzalez@gmail.com",
+      "telefono": null,
+      "tipo_documento": "DNI",
+      "numero_documento": "",
+      "imagen_perfil": "https://lh3.googleusercontent.com/mock_photo",
+      "roles": ["CLIENTE"],
+      "proveedor_autenticacion": "GOOGLE"
+    }
+  }
+}

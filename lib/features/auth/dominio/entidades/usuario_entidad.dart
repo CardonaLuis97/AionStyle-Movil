@@ -1,29 +1,53 @@
 import 'package:equatable/equatable.dart';
+import 'rol_usuario.dart';
+import 'tipo_documento.dart';
+import 'proveedor_autenticacion.dart';
 
-/// Entidad pura de dominio — sin dependencias de Dart/Flutter externas.
 class UsuarioEntidad extends Equatable {
   const UsuarioEntidad({
     required this.id,
-    required this.nombre,
-    required this.email,
+    required this.nombreCompleto,
+    required this.correo,
     this.telefono,
-    this.fotoPerfil,
-    this.rol = RolUsuario.cliente,
+    required this.tipoDocumento,
+    required this.numeroDocumento,
+    this.imagenPerfil,
+    required this.roles,
+    required this.proveedorAutenticacion,
   });
 
   final String id;
-  final String nombre;
-  final String email;
+  final String nombreCompleto;
+  final String correo;
   final String? telefono;
-  final String? fotoPerfil;
-  final RolUsuario rol;
+  final TipoDocumento tipoDocumento;
+  final String numeroDocumento;
+  final String? imagenPerfil;
+  final List<RolUsuario> roles;
+  final ProveedorAutenticacion proveedorAutenticacion;
 
-  bool get esBarbero => rol == RolUsuario.barbero;
-  bool get esPropietario => rol == RolUsuario.propietario;
-  bool get esAdmin => rol == RolUsuario.admin;
+  /// Perfil completo = tiene teléfono y número de documento
+  bool get perfilCompleto =>
+      telefono != null &&
+      telefono!.isNotEmpty &&
+      numeroDocumento.isNotEmpty;
+
+  bool tieneRol(RolUsuario rol) => roles.contains(rol);
+
+  bool get esCliente => tieneRol(RolUsuario.cliente);
+  bool get esBarbero => tieneRol(RolUsuario.barbero);
+  bool get esDueno => tieneRol(RolUsuario.dueno);
 
   @override
-  List<Object?> get props => [id, nombre, email, telefono, fotoPerfil, rol];
+  List<Object?> get props => [
+        id,
+        nombreCompleto,
+        correo,
+        telefono,
+        tipoDocumento,
+        numeroDocumento,
+        imagenPerfil,
+        roles,
+        proveedorAutenticacion,
+      ];
 }
-
-enum RolUsuario { cliente, barbero, propietario, admin }

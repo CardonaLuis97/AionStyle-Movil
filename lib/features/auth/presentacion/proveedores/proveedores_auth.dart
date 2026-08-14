@@ -1,51 +1,56 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../core/providers/proveedores_core.dart';
-import '../../datos/fuentes_de_datos/fuente_auth_remota.dart';
+import '../../datos/fuentes_de_datos/fuente_auth_local.dart';
 import '../../datos/repositorios/repositorio_auth_impl.dart';
 import '../../dominio/repositorios/repositorio_auth.dart';
 import '../../dominio/casos_de_uso/caso_uso_iniciar_sesion.dart';
 import '../../dominio/casos_de_uso/caso_uso_iniciar_sesion_google.dart';
 import '../../dominio/casos_de_uso/caso_uso_cerrar_sesion.dart';
 import '../../dominio/casos_de_uso/caso_uso_registrarse.dart';
+import '../../dominio/casos_de_uso/caso_uso_completar_perfil.dart';
 import '../modelos_vista/estado_auth.dart';
 import '../modelos_vista/viewmodel_auth.dart';
 
-// Fuente de datos
-final fuenteAuthRemotaProvider = Provider<FuenteDatosAuthRemota>((ref) {
-  return FuenteDatosAuthRemotaImpl(ref.watch(dioProvider));
+// Fuente de datos local (mock)
+final fuenteAuthLocalProvider = Provider<FuenteDatosAuthLocal>((ref) {
+  return FuenteDatosAuthLocalImpl();
 });
 
 // Repositorio
 final repositorioAuthProvider = Provider<RepositorioAuth>((ref) {
   return RepositorioAuthImpl(
-    fuenteRemota: ref.watch(fuenteAuthRemotaProvider),
+    fuenteLocal: ref.watch(fuenteAuthLocalProvider),
     almacenamiento: ref.watch(almacenamientoSeguroProvider),
     googleSignIn: GoogleSignIn(),
   );
 });
 
 // Casos de uso
-final casoUsoIniciarSesionProvider = Provider((ref) {
-  return CasoUsoIniciarSesion(ref.watch(repositorioAuthProvider));
+final casoUsoLoginCorreoProvider = Provider((ref) {
+  return CasoUsoLoginCorreo(ref.watch(repositorioAuthProvider));
 });
-final casoUsoGoogleProvider = Provider((ref) {
-  return CasoUsoIniciarSesionGoogle(ref.watch(repositorioAuthProvider));
+final casoUsoLoginGoogleProvider = Provider((ref) {
+  return CasoUsoLoginGoogle(ref.watch(repositorioAuthProvider));
 });
 final casoUsoCerrarSesionProvider = Provider((ref) {
   return CasoUsoCerrarSesion(ref.watch(repositorioAuthProvider));
 });
-final casoUsoRegistrarseProvider = Provider((ref) {
-  return CasoUsoRegistrarse(ref.watch(repositorioAuthProvider));
+final casoUsoRegistrarProvider = Provider((ref) {
+  return CasoUsoRegistrar(ref.watch(repositorioAuthProvider));
+});
+final casoUsoCompletarPerfilProvider = Provider((ref) {
+  return CasoUsoCompletarPerfil(ref.watch(repositorioAuthProvider));
 });
 
 // ViewModel
 final viewModelAuthProvider =
     StateNotifierProvider<ViewModelAuth, EstadoAuth>((ref) {
   return ViewModelAuth(
-    casoUsoIniciarSesion: ref.watch(casoUsoIniciarSesionProvider),
-    casoUsoGoogle: ref.watch(casoUsoGoogleProvider),
+    casoUsoLoginCorreo: ref.watch(casoUsoLoginCorreoProvider),
+    casoUsoLoginGoogle: ref.watch(casoUsoLoginGoogleProvider),
     casoUsoCerrarSesion: ref.watch(casoUsoCerrarSesionProvider),
-    casoUsoRegistrarse: ref.watch(casoUsoRegistrarseProvider),
+    casoUsoRegistrar: ref.watch(casoUsoRegistrarProvider),
+    casoUsoCompletarPerfil: ref.watch(casoUsoCompletarPerfilProvider),
   );
 });

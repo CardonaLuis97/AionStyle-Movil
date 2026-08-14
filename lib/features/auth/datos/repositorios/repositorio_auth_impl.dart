@@ -6,19 +6,132 @@ import '../../../../core/errors/fallos.dart';
 import '../../../../core/storage/almacenamiento_seguro.dart';
 import '../../../../core/utils/resultado.dart';
 import '../../dominio/entidades/usuario_entidad.dart';
+import '../../dominio/entidades/tipo_documento.dart';
 import '../../dominio/repositorios/repositorio_auth.dart';
-import '../fuentes_de_datos/fuente_auth_remota.dart';
+import '../fuentes_de_datos/fuente_auth_local.dart';
 
 class RepositorioAuthImpl implements RepositorioAuth {
   const RepositorioAuthImpl({
-    required this.fuenteRemota,
+    required this.fuenteLocal,
     required this.almacenamiento,
     required this.googleSignIn,
   });
 
-  final FuenteDatosAuthRemota fuenteRemota;
+  final FuenteDatosAuthLocal fuenteLocal;
   final AlmacenamientoSeguro almacenamiento;
   final GoogleSignIn googleSignIn;
+
+  @override
+  Future<Resultado<UsuarioEntidad>> loginConCorreo({
+    required String correo,
+    required String contrasena,
+  }) async {
+    try {
+      final modelo = await fuenteLocal.loginConCorreo(
+        correo: correo,
+        contrasena: contrasena,
+      );
+      return Right(modelo.aEntidad());
+    } on ExcepcionNoAutorizado {
+      return const Left(FalloNoAutorizado());
+    } on ExcepcionSinConexion {
+      return const Left(FalloSinConexion());
+    } on ExcepcionServidor catch (e) {
+      return Left(FalloServidor(e.mensaje));
+    }
+  }
+
+  @override
+  Future<Resultado<UsuarioEntidad>> loginConGoogle() async {
+    try {
+      final cuenta = await googleSignIn.signIn();
+      if (cuenta == null) return const Left(FalloServidor('Inicio cancelado'));
+
+      final autenticacion = await cuenta.authentication;
+      final idToken = autenticacion.idToken;
+      if (idToken == null) {
+        return const Left(FalloServidor('No se obtuvo token de Google'));
+      }
+
+      final modelo = await fuenteLocal.loginConGoogle(idToken);
+      return Right(modelo.aEntidad());
+    } on ExcepcionSinConexion {
+      return const Left(FalloSinConexion());
+    } on ExcepcionServidor catch (e) {
+      return Left(FalloServidor(e.mensaje));
+    }
+  }
+
+  @override
+  Future<Resultado<UsuarioEntidad>> registrar({
+    required String nombreCompleto,
+    required TipoDocumento tipoDocumento,
+    required String numeroDocumento,
+    required String telefono,
+    required String correo,
+    required String contrasena,
+  }) async {
+    try {
+      final modelo = await fuenteLocal.registrar(
+        nombreCompleto: nombreCompleto,
+        tipoDocumento: tipoDocumento.nombre,
+        numeroDocumento: numeroDocumento,
+        telefono: telefono,
+        correo: correo,
+        contrasena: contrasena,
+      );
+      return Right(modelo.aEntidad());
+    } on ExcepcionSinConexion {
+      return const Left(FalloSinConexion());
+    } on ExcepcionServidor catch (e) {
+      return Left(FalloServidor(e.mensaje));
+    }
+  }
+
+  @override
+  Future<Resultado<UsuarioEntidad>> completarPerfil({
+    required String usuarioId,
+    required String nombreCompleto,
+    required TipoDocumento tipoDocumento,
+    required String numeroDocumento,
+    required String telefono,
+  }) async {
+    try {
+      final modelo = await fuenteLocal.completarPerfil(
+        usuarioId: usuarioId,
+        nombreCompleto: nombreCompleto,
+        tipoDocumento: tipoDocumento.nombre,
+        numeroDocumento: numeroDocumento,
+        telefono: telefono,
+      );
+      return Right(modelo.aEntidad());
+    } on ExcepcionSinConexion {
+      return const Left(FalloSinConexion());
+    } on ExcepcionServidor catch (e) {
+      return Left(FalloServidor(e.mensaje));
+    }
+  }
+
+  @override
+  Future<ResultadoVacio> cerrarSesion() async {
+    try {
+      await fuenteLocal.cerrarSesion();
+      await almacenamiento.eliminar(ConstantesApp.claveTokenAcceso);
+      await almacenamiento.eliminar(ConstantesApp.claveTokenRefresco);
+      await googleSignIn.signOut();
+      return const Right(null);
+    } on ExcepcionServidor catch (e) {
+      return Left(FalloServidor(e.mensaje));
+    }
+  }
+
+  @override
+  Future<Resultado<UsuarioEntidad?>> obtenerUsuarioActual() async {
+    final token = await almacenamiento.leer(ConstantesApp.claveTokenAcceso);
+    if (token == null) return const Right(null);
+    return const Right(null);
+  }
+}
 
   @override
   Future<Resultado<UsuarioEntidad>> iniciarSesion({

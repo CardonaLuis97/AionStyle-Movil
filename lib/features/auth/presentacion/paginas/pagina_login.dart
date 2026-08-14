@@ -28,10 +28,10 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
     super.dispose();
   }
 
-  Future<void> _iniciarSesion() async {
+  Future<void> _loginConCorreo() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(viewModelAuthProvider.notifier).iniciarSesion(
-          email: _emailCtrl.text.trim(),
+    await ref.read(viewModelAuthProvider.notifier).loginConCorreo(
+          correo: _emailCtrl.text.trim(),
           contrasena: _contrasenaCtrl.text,
         );
   }
@@ -41,12 +41,13 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
     final estado = ref.watch(viewModelAuthProvider);
 
     ref.listen<EstadoAuth>(viewModelAuthProvider, (_, siguiente) {
-      if (siguiente is _Autenticado) context.go(Rutas.inicio);
-      if (siguiente is _Error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text((siguiente as dynamic).mensaje as String)),
-        );
-      }
+      siguiente.maybeWhen(
+        autenticado: (_) => context.go(Rutas.inicio),
+        perfilIncompleto: (_) => context.go(Rutas.completarPerfil),
+        error: (msg) => ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg))),
+        orElse: () {},
+      );
     });
 
     return Scaffold(
@@ -76,18 +77,25 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                 CampoContrasena(controlador: _contrasenaCtrl),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: estado is _Cargando ? null : _iniciarSesion,
-                  child: estado is _Cargando
-                      ? const CircularProgressIndicator()
-                      : const Text('Iniciar sesión'),
+                  onPressed: estado.maybeWhen(
+                    cargando: () => null,
+                    orElse: () => _loginConCorreo,
+                  ),
+                  child: estado.maybeWhen(
+                    cargando: () => const CircularProgressIndicator(),
+                    orElse: () => const Text('Iniciar sesión'),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Row(children: [Expanded(child: Divider()), Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text('o')), Expanded(child: Divider())]),
                 const SizedBox(height: 16),
                 BotonGoogle(
-                  onPresionado: estado is _Cargando
-                      ? null
-                      : () => ref.read(viewModelAuthProvider.notifier).iniciarSesionGoogle(),
+                  onPresionado: estado.maybeWhen(
+                    cargando: () => null,
+                    orElse: () => () => ref
+                        .read(viewModelAuthProvider.notifier)
+                        .loginConGoogle(),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 TextButton(
@@ -102,10 +110,3 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
     );
   }
 }
-
-// ignore: unused_element
-typedef _Autenticado = Object;
-// ignore: unused_element
-typedef _Cargando = Object;
-// ignore: unused_element
-typedef _Error = Object;

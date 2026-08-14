@@ -1,0 +1,17 @@
+{
+  "estado": "200",
+  "fecha_consumo": "2025-01-01T10:00:00Z",
+  "cuerpo": {
+    "usuario": {
+      "id": "usr_002",
+      "nombre_completo": "María González",
+      "correo": "maria.gonzalez@gmail.com",
+      "telefono": "+57 320 456 7890",
+      "tipo_documento": "DNI",
+      "numero_documento": "98765432",
+      "imagen_perfil": "https://lh3.googleusercontent.com/mock_photo",
+      "roles": ["CLIENTE"],
+      "proveedor_autenticacion": "GOOGLE"
+    }
+  }
+}

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
 class CampoContrasena extends StatefulWidget {
-  const CampoContrasena({super.key, required this.controlador, this.etiqueta = 'Contraseña'});
+  const CampoContrasena({
+    super.key,
+    required this.controlador,
+    this.etiqueta = 'Contraseña',
+    this.validador,
+  });
   final TextEditingController controlador;
   final String etiqueta;
+  final String? Function(String?)? validador;
 
   @override
   State<CampoContrasena> createState() => _CampoContrasenaState();
@@ -25,11 +31,12 @@ class _CampoContrasenaState extends State<CampoContrasena> {
           onPressed: () => setState(() => _oculto = !_oculto),
         ),
       ),
-      validator: (v) {
-        if (v == null || v.isEmpty) return 'Ingresa tu contraseña';
-        if (v.length < 8) return 'Mínimo 8 caracteres';
-        return null;
-      },
+      validator: widget.validador ??
+          (v) {
+            if (v == null || v.isEmpty) return 'Ingresa tu contraseña';
+            if (v.length < 8) return 'Mínimo 8 caracteres';
+            return null;
+          },
     );
   }
 }

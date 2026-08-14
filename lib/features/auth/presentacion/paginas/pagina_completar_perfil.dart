@@ -6,24 +6,21 @@ import '../../../../app/theme/colores.dart';
 import '../../dominio/entidades/tipo_documento.dart';
 import '../modelos_vista/estado_auth.dart';
 import '../proveedores/proveedores_auth.dart';
-import '../widgets/campo_email.dart';
-import '../widgets/campo_contrasena.dart';
 
-class PaginaRegistro extends ConsumerStatefulWidget {
-  const PaginaRegistro({super.key});
+class PaginaCompletarPerfil extends ConsumerStatefulWidget {
+  const PaginaCompletarPerfil({super.key});
 
   @override
-  ConsumerState<PaginaRegistro> createState() => _PaginaRegistroState();
+  ConsumerState<PaginaCompletarPerfil> createState() =>
+      _PaginaCompletarPerfilState();
 }
 
-class _PaginaRegistroState extends ConsumerState<PaginaRegistro> {
+class _PaginaCompletarPerfilState
+    extends ConsumerState<PaginaCompletarPerfil> {
   final _formKey = GlobalKey<FormState>();
   final _nombreCtrl = TextEditingController();
   final _documentoCtrl = TextEditingController();
   final _telefonoCtrl = TextEditingController();
-  final _correoCtrl = TextEditingController();
-  final _contrasenaCtrl = TextEditingController();
-  final _confirmarCtrl = TextEditingController();
   TipoDocumento _tipoDocumento = TipoDocumento.dni;
 
   @override
@@ -31,21 +28,22 @@ class _PaginaRegistroState extends ConsumerState<PaginaRegistro> {
     _nombreCtrl.dispose();
     _documentoCtrl.dispose();
     _telefonoCtrl.dispose();
-    _correoCtrl.dispose();
-    _contrasenaCtrl.dispose();
-    _confirmarCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _registrar() async {
+  Future<void> _completar() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(viewModelAuthProvider.notifier).registrar(
+    final estado = ref.read(viewModelAuthProvider);
+    final usuarioId = estado.maybeWhen(
+      perfilIncompleto: (u) => u.id,
+      orElse: () => '',
+    );
+    await ref.read(viewModelAuthProvider.notifier).completarPerfil(
+          usuarioId: usuarioId,
           nombreCompleto: _nombreCtrl.text.trim(),
           tipoDocumento: _tipoDocumento,
           numeroDocumento: _documentoCtrl.text.trim(),
           telefono: _telefonoCtrl.text.trim(),
-          correo: _correoCtrl.text.trim(),
-          contrasena: _contrasenaCtrl.text,
         );
   }
 
@@ -63,10 +61,12 @@ class _PaginaRegistroState extends ConsumerState<PaginaRegistro> {
     });
 
     return Scaffold(
+      backgroundColor: ColoresApp.secundario,
       appBar: AppBar(
-        title: const Text('Crear cuenta'),
         backgroundColor: ColoresApp.primario,
         foregroundColor: ColoresApp.secundario,
+        title: const Text('Completa tu perfil'),
+        automaticallyImplyLeading: false,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -76,6 +76,15 @@ class _PaginaRegistroState extends ConsumerState<PaginaRegistro> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 16),
+                Text(
+                  'Solo necesitamos un poco más de información',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: ColoresApp.terceario,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
                 TextFormField(
                   controller: _nombreCtrl,
                   decoration: const InputDecoration(
@@ -125,23 +134,11 @@ class _PaginaRegistroState extends ConsumerState<PaginaRegistro> {
                   validator: (v) =>
                       (v == null || v.trim().isEmpty) ? 'Ingresa tu número de celular' : null,
                 ),
-                const SizedBox(height: 16),
-                CampoEmail(controlador: _correoCtrl),
-                const SizedBox(height: 16),
-                CampoContrasena(controlador: _contrasenaCtrl),
-                const SizedBox(height: 16),
-                CampoContrasena(
-                  controlador: _confirmarCtrl,
-                  etiqueta: 'Confirmar contraseña',
-                  validador: (v) => v != _contrasenaCtrl.text
-                      ? 'Las contraseñas no coinciden'
-                      : null,
-                ),
                 const SizedBox(height: 32),
                 ElevatedButton(
                   onPressed: estado.maybeWhen(
                     cargando: () => null,
-                    orElse: () => _registrar,
+                    orElse: () => _completar,
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ColoresApp.primario,
@@ -152,7 +149,7 @@ class _PaginaRegistroState extends ConsumerState<PaginaRegistro> {
                     cargando: () => const CircularProgressIndicator(
                       color: ColoresApp.secundario,
                     ),
-                    orElse: () => const Text('Crear cuenta'),
+                    orElse: () => const Text('Continuar'),
                   ),
                 ),
               ],
