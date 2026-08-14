@@ -6,6 +6,7 @@ import '../../features/auth/presentacion/paginas/pagina_completar_perfil.dart';
 import '../../features/home/presentacion/paginas/pagina_inicio.dart';
 import '../../features/appointments/presentacion/paginas/pagina_citas.dart';
 import '../../features/appointments/presentacion/paginas/pagina_agendar_cita.dart';
+import '../../features/appointments/presentacion/paginas/pagina_confirmacion_cita.dart';
 import '../../features/profile/presentacion/paginas/pagina_perfil.dart';
 import '../../features/barbers/presentacion/paginas/pagina_barberos.dart';
 import '../../features/businesses/presentacion/paginas/pagina_negocios.dart';
@@ -26,6 +27,7 @@ abstract class Rutas {
   static const inicio = '/inicio';
   static const citas = '/citas';
   static const agendarCita = '/agendar-cita';
+  static const confirmacionCita = '/confirmacion-cita';
   static const perfil = '/perfil';
   static const barberos = '/barberos';
   static const negocios = '/negocios';
@@ -78,6 +80,22 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
                 negocioNombre: negocio,
                 barberoNombre: barbero,
                 especialidades: especialidades,
+              );
+            },
+          ),
+          GoRoute(
+            path: Rutas.confirmacionCita,
+            builder: (context, state) {
+              final p = state.uri.queryParameters;
+              final precio = double.tryParse(p['precio'] ?? '') ?? 0;
+              return PaginaConfirmacionCita(
+                negocioNombre: p['negocio'] ?? 'Negocio',
+                barberoNombre: p['barbero'] ?? 'Barbero',
+                corte: p['corte'] ?? 'Corte',
+                precio: precio,
+                fecha: p['fecha'] ?? 'Sin fecha',
+                hora: p['hora'] ?? 'Sin hora',
+                metodoPago: p['pago'] ?? 'Efectivo',
               );
             },
           ),

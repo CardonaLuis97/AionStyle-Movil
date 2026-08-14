@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/router/enrutador.dart';
 import '../../../../app/theme/colores.dart';
 
 enum MetodoPagoCita { efectivo, visa }
@@ -24,6 +27,35 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
   DateTime? _fechaSeleccionada;
   TimeOfDay? _horaSeleccionada;
   MetodoPagoCita _metodoPago = MetodoPagoCita.efectivo;
+  String? _corteSeleccionado;
+
+  Map<String, double> get _cortesConPrecio {
+    final mapa = <String, double>{};
+    for (var i = 0; i < widget.especialidades.length; i++) {
+      final corte = widget.especialidades[i];
+      mapa[corte] = 12 + (i * 4.5);
+    }
+    return mapa;
+  }
+
+  double get _precioSeleccionado {
+    if (_corteSeleccionado == null) return 0;
+    return _cortesConPrecio[_corteSeleccionado] ?? 0;
+  }
+
+  String get _fechaTexto {
+    if (_fechaSeleccionada == null) return 'Pendiente';
+    return '${_fechaSeleccionada!.day.toString().padLeft(2, '0')}/${_fechaSeleccionada!.month.toString().padLeft(2, '0')}/${_fechaSeleccionada!.year}';
+  }
+
+  String get _horaTexto {
+    if (_horaSeleccionada == null) return 'Pendiente';
+    return _horaSeleccionada!.format(context);
+  }
+
+  String get _metodoPagoTexto {
+    return _metodoPago == MetodoPagoCita.efectivo ? 'Efectivo' : 'Visa';
+  }
 
   List<TimeOfDay> get _horasDisponibles {
     final base = <TimeOfDay>[];
@@ -97,6 +129,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
   void _confirmarCita() {
     final formularioValido = _formKey.currentState?.validate() ?? false;
     if (!formularioValido) return;
+
     if (_fechaSeleccionada == null || _horaSeleccionada == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Completa fecha y hora para confirmar.')),
@@ -104,22 +137,15 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
       return;
     }
 
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Cita confirmada'),
-          content: Text(
-            'Tu cita con ${widget.barberoNombre} en ${widget.negocioNombre} ha sido registrada.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cerrar'),
-            ),
-          ],
-        );
-      },
+    if (_corteSeleccionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona el corte del cliente.')),
+      );
+      return;
+    }
+
+    context.pushReplacement(
+      '${Rutas.confirmacionCita}?negocio=${Uri.encodeComponent(widget.negocioNombre)}&barbero=${Uri.encodeComponent(widget.barberoNombre)}&corte=${Uri.encodeComponent(_corteSeleccionado!)}&precio=${_precioSeleccionado.toStringAsFixed(2)}&fecha=${Uri.encodeComponent(_fechaTexto)}&hora=${Uri.encodeComponent(_horaTexto)}&pago=${Uri.encodeComponent(_metodoPagoTexto)}',
     );
   }
 
@@ -150,14 +176,54 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
             ),
             const SizedBox(height: 16),
             _TarjetaFormulario(
+              titulo: 'Corte del cliente',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownButtonFormField<String>(
+                    initialValue: _corteSeleccionado,
+                    decoration: const InputDecoration(
+                      hintText: 'Selecciona un corte',
+                    ),
+                    items: _cortesConPrecio.entries.map((entrada) {
+                      return DropdownMenuItem<String>(
+                        value: entrada.key,
+                        child: Text('${entrada.key} - USD ${entrada.value.toStringAsFixed(2)}'),
+                      );
+                    }).toList(),
+                    onChanged: (valor) {
+                      setState(() {
+                        _corteSeleccionado = valor;
+                      });
+                    },
+                    validator: (valor) {
+                      if (valor == null || valor.isEmpty) {
+                        return 'Selecciona un corte';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _corteSeleccionado == null
+                        ? 'Precio pendiente'
+                        : 'Precio del corte: USD ${_precioSeleccionado.toStringAsFixed(2)}',
+                    style: tema.textTheme.bodySmall?.copyWith(
+                      color: ColoresApp.textoClaro,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            _TarjetaFormulario(
               titulo: 'Fecha de cita',
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.calendar_month_outlined),
                 title: Text(
-                  _fechaSeleccionada == null
-                      ? 'Seleccionar fecha'
-                      : '${_fechaSeleccionada!.day.toString().padLeft(2, '0')}/${_fechaSeleccionada!.month.toString().padLeft(2, '0')}/${_fechaSeleccionada!.year}',
+                  _fechaTexto == 'Pendiente' ? 'Seleccionar fecha' : _fechaTexto,
                   style: tema.textTheme.bodyMedium,
                 ),
                 subtitle: Text(
@@ -180,9 +246,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.access_time_outlined),
                     title: Text(
-                      _horaSeleccionada == null
-                          ? 'Seleccionar hora'
-                          : _horaSeleccionada!.format(context),
+                      _horaTexto == 'Pendiente' ? 'Seleccionar hora' : _horaTexto,
                       style: tema.textTheme.bodyMedium,
                     ),
                     subtitle: Text(
@@ -256,27 +320,19 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
             _TarjetaFormulario(
               titulo: 'Resumen de agenda',
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _lineaResumen('Negocio', widget.negocioNombre),
-                  _lineaResumen('Barbero', widget.barberoNombre),
-                  _lineaResumen('Especialidades', widget.especialidades.join(', ')),
-                  _lineaResumen(
-                    'Fecha',
-                    _fechaSeleccionada == null
+                  _filaResumen('Negocio', widget.negocioNombre),
+                  _filaResumen('Barbero', widget.barberoNombre),
+                  _filaResumen('Corte', _corteSeleccionado ?? 'Pendiente'),
+                  _filaResumen(
+                    'Precio',
+                    _corteSeleccionado == null
                         ? 'Pendiente'
-                        : '${_fechaSeleccionada!.day.toString().padLeft(2, '0')}/${_fechaSeleccionada!.month.toString().padLeft(2, '0')}/${_fechaSeleccionada!.year}',
+                        : 'USD ${_precioSeleccionado.toStringAsFixed(2)}',
                   ),
-                  _lineaResumen(
-                    'Hora',
-                    _horaSeleccionada == null
-                        ? 'Pendiente'
-                        : _horaSeleccionada!.format(context),
-                  ),
-                  _lineaResumen(
-                    'Pago',
-                    _metodoPago == MetodoPagoCita.efectivo ? 'Efectivo' : 'Visa',
-                  ),
+                  _filaResumen('Fecha', _fechaTexto),
+                  _filaResumen('Hora', _horaTexto),
+                  _filaResumen('Pago', _metodoPagoTexto),
                 ],
               ),
             ),
@@ -295,23 +351,39 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
     );
   }
 
-  Widget _lineaResumen(String etiqueta, String valor) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: RichText(
-        text: TextSpan(
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+  Widget _filaResumen(String etiqueta, String valor) {
+    final tema = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: ColoresApp.fondo,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              etiqueta,
+              style: tema.textTheme.bodySmall?.copyWith(
+                color: ColoresApp.textoClaro,
+                fontSize: 10,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              valor,
+              textAlign: TextAlign.end,
+              style: tema.textTheme.bodySmall?.copyWith(
                 color: ColoresApp.texto,
+                fontWeight: FontWeight.w700,
                 fontSize: 11,
               ),
-          children: [
-            TextSpan(
-              text: '$etiqueta: ',
-              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
-            TextSpan(text: valor),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
