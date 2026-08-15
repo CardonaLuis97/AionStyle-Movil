@@ -6,10 +6,12 @@ class CampoContrasena extends StatefulWidget {
     required this.controlador,
     this.etiqueta = 'Contraseña',
     this.validador,
+    this.mostrarIcono = true,
   });
   final TextEditingController controlador;
   final String etiqueta;
   final String? Function(String?)? validador;
+  final bool mostrarIcono;
 
   @override
   State<CampoContrasena> createState() => _CampoContrasenaState();
@@ -25,7 +27,7 @@ class _CampoContrasenaState extends State<CampoContrasena> {
       obscureText: _oculto,
       decoration: InputDecoration(
         labelText: widget.etiqueta,
-        prefixIcon: const Icon(Icons.lock_outline),
+        prefixIcon: widget.mostrarIcono ? const Icon(Icons.lock_outline) : null,
         suffixIcon: IconButton(
           icon: Icon(_oculto ? Icons.visibility_outlined : Icons.visibility_off_outlined),
           onPressed: () => setState(() => _oculto = !_oculto),
