@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/enrutador.dart';
+import '../../../../app/widgets/logo_aionstyle.dart';
 import '../modelos_vista/estado_auth.dart';
 import '../proveedores/proveedores_auth.dart';
 import '../widgets/campo_email.dart';
@@ -59,12 +60,13 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 48),
-                Text(
-                  'AionStyle',
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+                const Center(
+                  child: LogoAionStyle(
+                    ancho: 230,
+                    alto: 160,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
                   'Inicia sesión en tu cuenta',
                   style: Theme.of(context).textTheme.bodyLarge,

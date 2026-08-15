@@ -1,13 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/enrutador.dart';
 import '../../../../app/theme/colores.dart';
+import '../../../auth/presentacion/proveedores/proveedores_auth.dart';
 import '../widgets/factura_cita_widget.dart';
 
-class PaginaConfirmacionCita extends StatefulWidget {
+class PaginaConfirmacionCita extends ConsumerStatefulWidget {
   const PaginaConfirmacionCita({
     super.key,
     required this.negocioNombre,
@@ -30,10 +32,10 @@ class PaginaConfirmacionCita extends StatefulWidget {
   final String codigoQr;
 
   @override
-  State<PaginaConfirmacionCita> createState() => _PaginaConfirmacionCitaState();
+  ConsumerState<PaginaConfirmacionCita> createState() => _PaginaConfirmacionCitaState();
 }
 
-class _PaginaConfirmacionCitaState extends State<PaginaConfirmacionCita> {
+class _PaginaConfirmacionCitaState extends ConsumerState<PaginaConfirmacionCita> {
   Timer? _temporizador;
   int _segundos = 15;
 
@@ -66,12 +68,20 @@ class _PaginaConfirmacionCitaState extends State<PaginaConfirmacionCita> {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
+    final estadoAuth = ref.watch(viewModelAuthProvider);
+    final clienteNombre = estadoAuth.maybeWhen(
+      autenticado: (usuario) => usuario.nombreCompleto,
+      perfilIncompleto: (usuario) => usuario.nombreCompleto,
+      orElse: () => 'Cliente',
+    );
+
     return Scaffold(
       appBar: AppBar(title: const Text('Factura de cita')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           FacturaCitaWidget(
+            clienteNombre: clienteNombre,
             negocioNombre: widget.negocioNombre,
             barberoNombre: widget.barberoNombre,
             corte: widget.corte,

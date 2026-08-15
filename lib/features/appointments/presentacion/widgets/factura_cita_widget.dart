@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../app/theme/colores.dart';
+import '../../../../app/widgets/logo_aionstyle.dart';
 
 class FacturaCitaWidget extends StatelessWidget {
   const FacturaCitaWidget({
     super.key,
+    required this.clienteNombre,
     required this.negocioNombre,
     required this.barberoNombre,
     required this.corte,
@@ -16,6 +18,7 @@ class FacturaCitaWidget extends StatelessWidget {
     required this.codigoQr,
   });
 
+  final String clienteNombre;
   final String negocioNombre;
   final String barberoNombre;
   final String corte;
@@ -43,18 +46,19 @@ class FacturaCitaWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'FACTURA DE CITA',
+                'FACTURA N° 7',
                 style: tema.textTheme.labelLarge?.copyWith(
                   color: ColoresApp.primario,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.5,
                 ),
               ),
-              Text(
-                'AionStyle',
-                style: tema.textTheme.labelMedium?.copyWith(
-                  color: ColoresApp.textoClaro,
-                  fontWeight: FontWeight.w700,
+              const SizedBox(
+                width: 86,
+                height: 26,
+                child: LogoAionStyle(
+                  ajuste: BoxFit.cover,
+                  borde: BorderRadius.all(Radius.circular(8)),
                 ),
               ),
             ],
@@ -62,6 +66,7 @@ class FacturaCitaWidget extends StatelessWidget {
           const SizedBox(height: 10),
           const Divider(height: 1),
           const SizedBox(height: 10),
+          _linea('Cliente', clienteNombre),
           _linea('Negocio', negocioNombre),
           _linea('Barbero', barberoNombre),
           _linea('Corte', corte),

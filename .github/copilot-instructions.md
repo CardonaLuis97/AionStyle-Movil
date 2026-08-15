@@ -98,6 +98,14 @@ Consulta y aplica siempre estas skills:
 
 ---
 
+## Protocolo de conversación
+
+- En cada respuesta al usuario, dirigirse por su nombre: **Luis**
+- Priorizar siempre el agente **AionStyle Guía** para tareas de arquitectura/revisión/scaffolding
+- Aplicar siempre las skills activas cuando corresponda al tipo de cambio
+
+---
+
 ## Reglas de oro
 
 1. Siempre `ColoresApp.primario / .secundario / .terceario` — nunca colores en crudo

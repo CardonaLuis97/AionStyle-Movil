@@ -84,6 +84,23 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
       firstDate: ahora,
       lastDate: ahora.add(const Duration(days: 60)),
       helpText: 'Selecciona fecha de cita',
+      builder: (context, child) {
+        final tema = Theme.of(context);
+        final esquema = tema.colorScheme;
+        return Theme(
+          data: tema.copyWith(
+            colorScheme: esquema.copyWith(
+              surface: tema.brightness == Brightness.dark
+                  ? ColoresApp.primario
+                  : ColoresApp.secundario,
+              onSurface: tema.brightness == Brightness.dark
+                  ? ColoresApp.secundario
+                  : ColoresApp.texto,
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
     if (fecha != null) {
       setState(() {
@@ -106,6 +123,23 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
       context: context,
       initialTime: disponible.first,
       helpText: 'Selecciona hora de llegada',
+      builder: (context, child) {
+        final tema = Theme.of(context);
+        final esquema = tema.colorScheme;
+        return Theme(
+          data: tema.copyWith(
+            colorScheme: esquema.copyWith(
+              surface: tema.brightness == Brightness.dark
+                  ? ColoresApp.primario
+                  : ColoresApp.secundario,
+              onSurface: tema.brightness == Brightness.dark
+                  ? ColoresApp.secundario
+                  : ColoresApp.texto,
+            ),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
 
     if (propuesta == null) return;
@@ -156,6 +190,8 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
+    final esquema = tema.colorScheme;
+    final esOscuro = tema.brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(title: const Text('Agendar cita')),
       body: Form(
@@ -166,7 +202,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
             Text(
               'Reserva con ${widget.barberoNombre}',
               style: tema.textTheme.titleMedium?.copyWith(
-                color: ColoresApp.primario,
+                color: esquema.onSurface,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -174,7 +210,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
             Text(
               widget.negocioNombre,
               style: tema.textTheme.bodySmall?.copyWith(
-                color: ColoresApp.textoClaro,
+                color: esquema.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),
@@ -213,7 +249,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
                         ? 'Precio pendiente'
                         : 'Precio del corte: USD ${_precioSeleccionado.toStringAsFixed(2)}',
                     style: tema.textTheme.bodySmall?.copyWith(
-                      color: ColoresApp.textoClaro,
+                      color: esquema.onSurfaceVariant,
                       fontSize: 11,
                     ),
                   ),
@@ -234,9 +270,17 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
                   'Ver disponibilidad del barbero',
                   style: tema.textTheme.bodySmall,
                 ),
-                trailing: TextButton(
+                trailing: TextButton.icon(
                   onPressed: _seleccionarFecha,
-                  child: const Text('Elegir'),
+                  icon: const Icon(Icons.calendar_month_outlined, size: 16),
+                  label: const Text('Elegir'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    side: BorderSide(
+                      color: esquema.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                    foregroundColor: esquema.onSurface,
+                  ),
                 ),
               ),
             ),
@@ -257,9 +301,17 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
                       'Disponibilidad segun fecha elegida',
                       style: tema.textTheme.bodySmall,
                     ),
-                    trailing: TextButton(
+                    trailing: TextButton.icon(
                       onPressed: _seleccionarHora,
-                      child: const Text('Elegir'),
+                      icon: const Icon(Icons.schedule_outlined, size: 16),
+                      label: const Text('Elegir'),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        side: BorderSide(
+                          color: esquema.onSurfaceVariant.withValues(alpha: 0.5),
+                        ),
+                        foregroundColor: esquema.onSurface,
+                      ),
                     ),
                   ),
                   Wrap(
@@ -268,7 +320,12 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
                     children: _horasDisponibles.take(8).map((hora) {
                       return Chip(
                         label: Text(hora.format(context)),
-                        backgroundColor: ColoresApp.fondo,
+                        backgroundColor: esOscuro
+                            ? ColoresApp.primario
+                            : ColoresApp.fondo,
+                        side: BorderSide(
+                          color: esquema.onSurfaceVariant.withValues(alpha: 0.35),
+                        ),
                       );
                     }).toList(),
                   ),
@@ -357,13 +414,18 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
 
   Widget _filaResumen(String etiqueta, String valor) {
     final tema = Theme.of(context);
+    final esquema = tema.colorScheme;
+    final esOscuro = tema.brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 7),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: ColoresApp.fondo,
+        color: esOscuro ? ColoresApp.primario : ColoresApp.fondo,
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: esquema.onSurfaceVariant.withValues(alpha: esOscuro ? 0.35 : 0.2),
+        ),
       ),
       child: Row(
         children: [
@@ -371,7 +433,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
             child: Text(
               etiqueta,
               style: tema.textTheme.bodySmall?.copyWith(
-                color: ColoresApp.textoClaro,
+                color: esquema.onSurfaceVariant,
                 fontSize: 10,
               ),
             ),
@@ -381,7 +443,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
               valor,
               textAlign: TextAlign.end,
               style: tema.textTheme.bodySmall?.copyWith(
-                color: ColoresApp.texto,
+                color: esquema.onSurface,
                 fontWeight: FontWeight.w700,
                 fontSize: 11,
               ),
@@ -402,12 +464,16 @@ class _TarjetaFormulario extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
+    final esquema = tema.colorScheme;
+    final esOscuro = tema.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: ColoresApp.secundario,
+        color: esOscuro ? ColoresApp.primario : ColoresApp.secundario,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColoresApp.terceario.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: ColoresApp.terceario.withValues(alpha: esOscuro ? 0.45 : 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,7 +481,7 @@ class _TarjetaFormulario extends StatelessWidget {
           Text(
             titulo,
             style: tema.textTheme.labelLarge?.copyWith(
-              color: ColoresApp.primario,
+              color: esquema.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 12,
             ),

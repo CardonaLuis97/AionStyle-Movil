@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/colores.dart';
+import '../../../auth/presentacion/proveedores/proveedores_auth.dart';
 import '../widgets/factura_cita_widget.dart';
 
-enum FiltroCitas { pendientes, historial }
+enum FiltroCitas { pendientes, canceladas, historial }
+enum EstadoCitaVista { pendiente, cancelada, finalizada }
 
 class PaginaCitas extends ConsumerStatefulWidget {
   const PaginaCitas({
@@ -35,7 +37,7 @@ class PaginaCitas extends ConsumerStatefulWidget {
 class _PaginaCitasState extends ConsumerState<PaginaCitas> {
   FiltroCitas _filtro = FiltroCitas.pendientes;
 
-  bool get _tieneFactura {
+  bool get _tieneCitaEnviada {
     return widget.negocioNombre != null &&
         widget.barberoNombre != null &&
         widget.corte != null &&
@@ -49,6 +51,16 @@ class _PaginaCitasState extends ConsumerState<PaginaCitas> {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
+    final esquema = tema.colorScheme;
+    final estadoAuth = ref.watch(viewModelAuthProvider);
+    final clienteNombre = estadoAuth.maybeWhen(
+      autenticado: (usuario) => usuario.nombreCompleto,
+      perfilIncompleto: (usuario) => usuario.nombreCompleto,
+      orElse: () => 'Cliente',
+    );
+
+    final citas = _citasPorFiltro();
+
     return Scaffold(
       appBar: AppBar(title: const Text('Mis Citas')),
       body: ListView(
@@ -66,6 +78,14 @@ class _PaginaCitasState extends ConsumerState<PaginaCitas> {
               const SizedBox(width: 8),
               Expanded(
                 child: _BotonFiltro(
+                  titulo: 'Canceladas',
+                  activo: _filtro == FiltroCitas.canceladas,
+                  onTap: () => setState(() => _filtro = FiltroCitas.canceladas),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _BotonFiltro(
                   titulo: 'Historial',
                   activo: _filtro == FiltroCitas.historial,
                   onTap: () => setState(() => _filtro = FiltroCitas.historial),
@@ -74,38 +94,372 @@ class _PaginaCitasState extends ConsumerState<PaginaCitas> {
             ],
           ),
           const SizedBox(height: 14),
-          if (!_tieneFactura)
+          if (citas.isEmpty)
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: ColoresApp.secundario,
+                color: tema.brightness == Brightness.dark
+                    ? ColoresApp.primario
+                    : ColoresApp.secundario,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: ColoresApp.terceario.withValues(alpha: 0.2)),
+                border: Border.all(
+                  color: esquema.onSurfaceVariant.withValues(alpha: 0.25),
+                ),
               ),
               child: Text(
-                _filtro == FiltroCitas.pendientes
-                    ? 'No tienes citas pendientes por ahora.'
-                    : 'Aun no hay citas en historial.',
-                style: tema.textTheme.bodyMedium?.copyWith(color: ColoresApp.textoClaro),
+                _mensajeVacio(),
+                style: tema.textTheme.bodyMedium?.copyWith(
+                  color: esquema.onSurfaceVariant,
+                ),
               ),
             )
           else
-            FacturaCitaWidget(
-              negocioNombre: widget.negocioNombre!,
-              barberoNombre: widget.barberoNombre!,
-              corte: widget.corte!,
-              precio: widget.precio!,
-              fecha: widget.fecha!,
-              hora: widget.hora!,
-              metodoPago: widget.metodoPago!,
-              codigoQr: widget.codigoQr!,
+            ...citas.map(
+              (cita) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _TarjetaCita(
+                  cita: cita,
+                  soloDetalle: _filtro == FiltroCitas.historial,
+                  onVerDetalle: () => _mostrarDetalleFactura(
+                    context: context,
+                    clienteNombre: clienteNombre,
+                    cita: cita,
+                  ),
+                  onOpinar: _filtro == FiltroCitas.historial
+                      ? null
+                      : () => _mostrarModalOpinar(cita),
+                ),
+              ),
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        icon: const Icon(Icons.add),
-        label: const Text('Nueva cita'),
+    );
+  }
+
+  List<_CitaVista> _citasPorFiltro() {
+    final base = <_CitaVista>[
+      if (_tieneCitaEnviada)
+        _CitaVista(
+          negocioNombre: widget.negocioNombre!,
+          barberoNombre: widget.barberoNombre!,
+          corte: widget.corte!,
+          precio: widget.precio!,
+          fecha: widget.fecha!,
+          hora: widget.hora!,
+          metodoPago: widget.metodoPago!,
+          codigoQr: widget.codigoQr!,
+          imagenUrl: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=120&q=60',
+          estado: EstadoCitaVista.pendiente,
+        ),
+      const _CitaVista(
+        negocioNombre: 'Barberia Central',
+        barberoNombre: 'Carlos Mendez',
+        corte: 'Fade Clasico',
+        precio: 18,
+        fecha: '22/08/2026',
+        hora: '10:30',
+        metodoPago: 'Efectivo',
+        codigoQr: 'AIONSTYLE|DEMO|CENTRAL|CARLOS|FADE|22/08/2026|10:30|18.00',
+        imagenUrl: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=120&q=60',
+        estado: EstadoCitaVista.pendiente,
+      ),
+      const _CitaVista(
+        negocioNombre: 'Salon Eclipse',
+        barberoNombre: 'Andrea Ruiz',
+        corte: 'Perfilado Premium',
+        precio: 24,
+        fecha: '25/08/2026',
+        hora: '16:00',
+        metodoPago: 'Visa',
+        codigoQr: 'AIONSTYLE|DEMO|ECLIPSE|ANDREA|PERFILADO|25/08/2026|16:00|24.00',
+        imagenUrl: 'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?auto=format&fit=crop&w=120&q=60',
+        estado: EstadoCitaVista.cancelada,
+      ),
+      const _CitaVista(
+        negocioNombre: 'Studio Norte',
+        barberoNombre: 'Luis Paredes',
+        corte: 'Corte y barba',
+        precio: 21,
+        fecha: '11/08/2026',
+        hora: '12:00',
+        metodoPago: 'Efectivo',
+        codigoQr: 'AIONSTYLE|DEMO|NORTE|LUIS|CORTEYBARBA|11/08/2026|12:00|21.00',
+        imagenUrl: 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=120&q=60',
+        estado: EstadoCitaVista.finalizada,
+      ),
+    ];
+
+    switch (_filtro) {
+      case FiltroCitas.pendientes:
+        return base.where((c) => c.estado == EstadoCitaVista.pendiente).toList();
+      case FiltroCitas.canceladas:
+        return base.where((c) => c.estado == EstadoCitaVista.cancelada).toList();
+      case FiltroCitas.historial:
+        return base.where((c) => c.estado == EstadoCitaVista.finalizada).toList();
+    }
+  }
+
+  String _mensajeVacio() {
+    switch (_filtro) {
+      case FiltroCitas.pendientes:
+        return 'No tienes citas pendientes por ahora.';
+      case FiltroCitas.canceladas:
+        return 'No tienes citas canceladas por ahora.';
+      case FiltroCitas.historial:
+        return 'Aun no hay citas en historial.';
+    }
+  }
+
+  Future<void> _mostrarDetalleFactura({
+    required BuildContext context,
+    required String clienteNombre,
+    required _CitaVista cita,
+  }) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.55,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, controlador) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: ListView(
+                controller: controlador,
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+                children: [
+                  Center(
+                    child: Container(
+                      width: 46,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: ColoresApp.terceario.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                  FacturaCitaWidget(
+                    clienteNombre: clienteNombre,
+                    negocioNombre: cita.negocioNombre,
+                    barberoNombre: cita.barberoNombre,
+                    corte: cita.corte,
+                    precio: cita.precio,
+                    fecha: cita.fecha,
+                    hora: cita.hora,
+                    metodoPago: cita.metodoPago,
+                    codigoQr: cita.codigoQr,
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _mostrarModalOpinar(_CitaVista cita) async {
+    var estrellas = 0;
+    final tema = Theme.of(context);
+    final esquema = tema.colorScheme;
+
+    final valor = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Opinar sobre ${cita.barberoNombre}'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Selecciona de 1 a 5 estrellas',
+                    style: tema.textTheme.bodySmall?.copyWith(
+                      color: esquema.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 6,
+                    children: List.generate(5, (index) {
+                      final activa = index < estrellas;
+                      return IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            estrellas = index + 1;
+                          });
+                        },
+                        icon: Icon(
+                          activa ? Icons.star : Icons.star_outline,
+                          color: activa ? ColoresApp.dorado : esquema.onSurfaceVariant,
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: estrellas == 0
+                      ? null
+                      : () => Navigator.of(context).pop(estrellas),
+                  child: const Text('Guardar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (!mounted || valor == null) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Calificacion enviada: $valor estrellas para ${cita.barberoNombre}.'),
+      ),
+    );
+  }
+}
+
+class _TarjetaCita extends StatelessWidget {
+  const _TarjetaCita({
+    required this.cita,
+    required this.soloDetalle,
+    required this.onVerDetalle,
+    required this.onOpinar,
+  });
+
+  final _CitaVista cita;
+  final bool soloDetalle;
+  final VoidCallback onVerDetalle;
+  final VoidCallback? onOpinar;
+
+  @override
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    final esquema = tema.colorScheme;
+    final esOscuro = tema.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: esOscuro ? ColoresApp.primario : ColoresApp.secundario,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: esquema.onSurfaceVariant.withValues(alpha: esOscuro ? 0.4 : 0.2),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: ColoresApp.fondo,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    cita.imagenUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [ColoresApp.primario, ColoresApp.terceario],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.content_cut,
+                            color: ColoresApp.secundario,
+                            size: 24,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cita.negocioNombre,
+                      style: tema.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: esquema.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Fecha: ${cita.fecha}  ${cita.hora}',
+                      style: tema.textTheme.bodySmall?.copyWith(
+                        color: esquema.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      'Corte: ${cita.corte}',
+                      style: tema.textTheme.bodySmall?.copyWith(
+                        color: esquema.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'USD ${cita.precio.toStringAsFixed(2)}',
+                style: tema.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: esquema.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onVerDetalle,
+                  child: const Text('Ver detalle'),
+                ),
+              ),
+              if (!soloDetalle) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onOpinar,
+                    child: const Text('Opinar'),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -146,4 +500,30 @@ class _BotonFiltro extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CitaVista {
+  const _CitaVista({
+    required this.negocioNombre,
+    required this.barberoNombre,
+    required this.corte,
+    required this.precio,
+    required this.fecha,
+    required this.hora,
+    required this.metodoPago,
+    required this.codigoQr,
+    required this.imagenUrl,
+    required this.estado,
+  });
+
+  final String negocioNombre;
+  final String barberoNombre;
+  final String corte;
+  final double precio;
+  final String fecha;
+  final String hora;
+  final String metodoPago;
+  final String codigoQr;
+  final String imagenUrl;
+  final EstadoCitaVista estado;
 }

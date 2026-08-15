@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app/theme/colores.dart';
 
 /// Vista de error reutilizable con botón de reintento.
 class VistaError extends StatelessWidget {
@@ -14,7 +15,7 @@ class VistaError extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const Icon(Icons.error_outline, size: 64, color: ColoresApp.error),
             const SizedBox(height: 16),
             Text(
               mensaje,

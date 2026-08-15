@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/enrutador.dart';
 import '../../../../app/theme/colores.dart';
+import '../../../../app/widgets/logo_aionstyle.dart';
 import '../modelos_vista/datos_negocios_mock.dart';
 import '../modelos_vista/negocio_vista.dart';
 
@@ -330,27 +331,12 @@ class _LogoEmpresa extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: ColoresApp.primario.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.content_cut, size: 12, color: ColoresApp.secundario),
-          const SizedBox(width: 4),
-          Text(
-            'AionStyle',
-            style: tema.textTheme.labelSmall?.copyWith(
-              color: ColoresApp.secundario,
-              fontWeight: FontWeight.w700,
-              fontSize: 10,
-            ),
-          ),
-        ],
+    return const SizedBox(
+      width: 86,
+      height: 32,
+      child: LogoAionStyle(
+        ajuste: BoxFit.cover,
+        borde: BorderRadius.all(Radius.circular(10)),
       ),
     );
   }
