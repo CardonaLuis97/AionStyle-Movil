@@ -62,8 +62,8 @@ class PaginaDetalleNegocio extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          ColoresApp.primario.withValues(alpha: 0.05),
-                          ColoresApp.primario.withValues(alpha: 0.82),
+                          ColoresApp.primario.withValues(alpha: 0.18),
+                          ColoresApp.primario.withValues(alpha: 0.90),
                         ],
                       ),
                     ),
@@ -87,9 +87,10 @@ class PaginaDetalleNegocio extends StatelessWidget {
                   Text(
                     'Barberos disponibles',
                     style: tema.textTheme.titleSmall?.copyWith(
-                      color: ColoresApp.secundario,
+                      color: ColoresApp.dorado,
                       fontWeight: FontWeight.w700,
-                      fontSize: 15,
+                      fontSize: 16,
+                      letterSpacing: 0.2,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -191,14 +192,14 @@ class _TarjetaBarberoDetalle extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: ColoresApp.terceario,
+        color: ColoresApp.acento,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColoresApp.dorado.withValues(alpha: 0.45)),
+        border: Border.all(color: ColoresApp.dorado.withValues(alpha: 0.65)),
         boxShadow: [
           BoxShadow(
-            color: ColoresApp.primario.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: ColoresApp.primario.withValues(alpha: 0.24),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -240,7 +241,7 @@ class _TarjetaBarberoDetalle extends StatelessWidget {
                 Text(
                   barbero.experiencia,
                   style: tema.textTheme.bodySmall?.copyWith(
-                    color: ColoresApp.textoClaro,
+                    color: ColoresApp.primario.withValues(alpha: 0.72),
                     fontSize: 10,
                   ),
                 ),
@@ -250,7 +251,7 @@ class _TarjetaBarberoDetalle extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: tema.textTheme.bodySmall?.copyWith(
-                    color: ColoresApp.texto,
+                    color: ColoresApp.primario,
                     fontSize: 10,
                   ),
                 ),
@@ -335,14 +336,14 @@ class _TagInfo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 6, 10, 6),
       decoration: BoxDecoration(
-        color: ColoresApp.primario.withValues(alpha: 0.36),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: ColoresApp.dorado.withValues(alpha: 0.55)),
+        color: ColoresApp.secundario.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ColoresApp.dorado.withValues(alpha: 0.7)),
         boxShadow: [
           BoxShadow(
-            color: ColoresApp.primario.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: ColoresApp.primario.withValues(alpha: 0.28),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -354,7 +355,7 @@ class _TagInfo extends StatelessWidget {
             width: 22,
             height: 22,
             decoration: const BoxDecoration(
-              color: ColoresApp.terceario,
+              color: ColoresApp.secundario,
               shape: BoxShape.circle,
             ),
             child: Icon(icono, size: 12, color: ColoresApp.primario),
@@ -383,6 +384,7 @@ class _TagInfo extends StatelessWidget {
                   style: tema.textTheme.bodySmall?.copyWith(
                     color: ColoresApp.secundario,
                     fontSize: 10,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],

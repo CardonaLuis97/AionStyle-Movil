@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../app/theme/colores.dart';
-import '../../../../app/widgets/logo_aionstyle.dart';
 
 class FacturaCitaWidget extends StatelessWidget {
   const FacturaCitaWidget({
@@ -53,12 +52,15 @@ class FacturaCitaWidget extends StatelessWidget {
                   letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(
-                width: 86,
-                height: 26,
-                child: LogoAionStyle(
-                  ajuste: BoxFit.cover,
-                  borde: BorderRadius.all(Radius.circular(8)),
+              SizedBox(
+                width: 120,
+                height: 34,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'assets/images/logoNegro.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ],
@@ -74,32 +76,24 @@ class FacturaCitaWidget extends StatelessWidget {
           _linea('Hora', hora),
           _linea('Pago', metodoPago),
           const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: ColoresApp.fondo,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: ColoresApp.terceario.withValues(alpha: 0.2)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'TOTAL',
-                  style: tema.textTheme.titleSmall?.copyWith(
-                    color: ColoresApp.primario,
-                    fontWeight: FontWeight.w800,
-                  ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'TOTAL',
+                style: tema.textTheme.titleSmall?.copyWith(
+                  color: ColoresApp.primario,
+                  fontWeight: FontWeight.w800,
                 ),
-                Text(
-                  'USD ${precio.toStringAsFixed(2)}',
-                  style: tema.textTheme.titleSmall?.copyWith(
-                    color: ColoresApp.primario,
-                    fontWeight: FontWeight.w800,
-                  ),
+              ),
+              Text(
+                'USD ${precio.toStringAsFixed(2)}',
+                style: tema.textTheme.titleSmall?.copyWith(
+                  color: ColoresApp.primario,
+                  fontWeight: FontWeight.w800,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           Center(
