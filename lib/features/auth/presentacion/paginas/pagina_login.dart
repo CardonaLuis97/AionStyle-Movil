@@ -55,7 +55,7 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
     });
 
     return Scaffold(
-      backgroundColor: ColoresApp.primario,
+      backgroundColor: ColoresApp.terceario,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final anchoCard = math.min(constraints.maxWidth - 34, 620.0);
@@ -68,14 +68,14 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                   Positioned(
                     left: 0,
                     right: 0,
-                    bottom: 0,
+                    top: 0,
                     child: Container(
-                      height: constraints.maxHeight * 0.42,
+                      height: constraints.maxHeight * 0.7,
                       decoration: const BoxDecoration(
-                        color: ColoresApp.terceario,
+                        color: ColoresApp.primario,
                         borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(74),
-                          topRight: Radius.circular(74),
+                          bottomLeft: Radius.circular(74),
+                          bottomRight: Radius.circular(74),
                         ),
                       ),
                     ),
@@ -83,12 +83,12 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                   Column(
                     children: [
                       const SizedBox(height: 24),
-                      const LogoAionStyle(ancho: 320, alto: 248),
+                      const LogoAionStyle(ancho: 420, alto: 348),
                       const SizedBox(height: 8),
                       Center(
                         child: Container(
                           width: anchoCard,
-                          margin: const EdgeInsets.only(top: 6, bottom: 28),
+                          margin: const EdgeInsets.only(top: 2, bottom: 28),
                           padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
                           decoration: const BoxDecoration(
                             color: ColoresApp.acento,
@@ -109,19 +109,19 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                                   textAlign: TextAlign.center,
                                   style: tema.textTheme.titleLarge?.copyWith(
                                     color: ColoresApp.primario,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 28,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 22,
                                   ),
                                 ),
                                 const SizedBox(height: 24),
                                 CampoEmail(
                                   controlador: _emailCtrl,
-                                  mostrarIcono: false,
+                                  mostrarIcono: true,
                                 ),
                                 const SizedBox(height: 14),
                                 CampoContrasena(
                                   controlador: _contrasenaCtrl,
-                                  mostrarIcono: false,
+                                  mostrarIcono: true,
                                 ),
                                 const SizedBox(height: 20),
                                 ElevatedButton(
@@ -147,7 +147,7 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                                     orElse: () => Text(
                                       'Iniciar sesión',
                                       style: tema.textTheme.labelLarge?.copyWith(
-                                        color: ColoresApp.secundario,
+                                        color: ColoresApp.primario,
                                         fontSize: 19,
                                         fontWeight: FontWeight.w500,
                                       ),
