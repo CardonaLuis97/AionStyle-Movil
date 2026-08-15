@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -56,144 +58,170 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
       backgroundColor: ColoresApp.primario,
       body: LayoutBuilder(
         builder: (context, constraints) {
+          final anchoCard = math.min(constraints.maxWidth - 34, 620.0);
+
           return SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Column(
+              child: Stack(
                 children: [
-                  const SizedBox(height: 36),
-                  const LogoAionStyle(ancho: 250, alto: 200),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(top: 8),
-                    padding: const EdgeInsets.fromLTRB(28, 30, 28, 28),
-                    decoration: const BoxDecoration(
-                      color: ColoresApp.acento,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(42),
-                        topRight: Radius.circular(42),
-                        bottomLeft: Radius.circular(34),
-                        bottomRight: Radius.circular(34),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      height: constraints.maxHeight * 0.42,
+                      decoration: const BoxDecoration(
+                        color: ColoresApp.terceario,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(74),
+                          topRight: Radius.circular(74),
+                        ),
                       ),
                     ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'Inicia sesión en tu cuenta',
-                            style: tema.textTheme.titleLarge?.copyWith(
-                              color: ColoresApp.primario,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 36,
+                  ),
+                  Column(
+                    children: [
+                      const SizedBox(height: 24),
+                      const LogoAionStyle(ancho: 320, alto: 248),
+                      const SizedBox(height: 8),
+                      Center(
+                        child: Container(
+                          width: anchoCard,
+                          margin: const EdgeInsets.only(top: 6, bottom: 28),
+                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
+                          decoration: const BoxDecoration(
+                            color: ColoresApp.acento,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(36),
+                              topRight: Radius.circular(36),
+                              bottomLeft: Radius.circular(30),
+                              bottomRight: Radius.circular(30),
                             ),
                           ),
-                          const SizedBox(height: 30),
-                          CampoEmail(
-                            controlador: _emailCtrl,
-                            mostrarIcono: false,
-                          ),
-                          const SizedBox(height: 14),
-                          CampoContrasena(
-                            controlador: _contrasenaCtrl,
-                            mostrarIcono: false,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: estado.maybeWhen(
-                              cargando: () => null,
-                              orElse: () => _loginConCorreo,
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(58),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            child: estado.maybeWhen(
-                              cargando: () => const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: ColoresApp.secundario,
-                                ),
-                              ),
-                              orElse: () => Text(
-                                'Iniciar sesión',
-                                style: tema.textTheme.labelLarge?.copyWith(
-                                  color: ColoresApp.secundario,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              const Expanded(
-                                child: Divider(
-                                  color: ColoresApp.primario,
-                                  thickness: 1.2,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                ),
-                                child: Text(
-                                  'o',
-                                  style: tema.textTheme.titleMedium?.copyWith(
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  'Inicia sesión en tu cuenta',
+                                  textAlign: TextAlign.center,
+                                  style: tema.textTheme.titleLarge?.copyWith(
                                     color: ColoresApp.primario,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 28,
                                   ),
                                 ),
-                              ),
-                              const Expanded(
-                                child: Divider(
-                                  color: ColoresApp.primario,
-                                  thickness: 1.2,
+                                const SizedBox(height: 24),
+                                CampoEmail(
+                                  controlador: _emailCtrl,
+                                  mostrarIcono: false,
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          BotonGoogle(
-                            onPresionado: estado.maybeWhen(
-                              cargando: () => null,
-                              orElse: () => () => ref
-                                  .read(viewModelAuthProvider.notifier)
-                                  .loginConGoogle(),
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          TextButton(
-                            onPressed: () => context.push(Rutas.registro),
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                style: tema.textTheme.titleMedium?.copyWith(
-                                  color: ColoresApp.primario,
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 19,
+                                const SizedBox(height: 14),
+                                CampoContrasena(
+                                  controlador: _contrasenaCtrl,
+                                  mostrarIcono: false,
                                 ),
-                                children: const [
-                                  TextSpan(text: 'No tienes cuenta '),
-                                  TextSpan(
-                                    text: 'Regístrate',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  onPressed: estado.maybeWhen(
+                                    cargando: () => null,
+                                    orElse: () => _loginConCorreo,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize: const Size.fromHeight(56),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
                                   ),
-                                ],
-                              ),
+                                  child: estado.maybeWhen(
+                                    cargando: () => const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: ColoresApp.secundario,
+                                      ),
+                                    ),
+                                    orElse: () => Text(
+                                      'Iniciar sesión',
+                                      style: tema.textTheme.labelLarge?.copyWith(
+                                        color: ColoresApp.secundario,
+                                        fontSize: 19,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                Row(
+                                  children: [
+                                    const Expanded(
+                                      child: Divider(
+                                        color: ColoresApp.primario,
+                                        thickness: 1.2,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                      ),
+                                      child: Text(
+                                        'o',
+                                        style:
+                                            tema.textTheme.titleMedium?.copyWith(
+                                          color: ColoresApp.primario,
+                                        ),
+                                      ),
+                                    ),
+                                    const Expanded(
+                                      child: Divider(
+                                        color: ColoresApp.primario,
+                                        thickness: 1.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 14),
+                                BotonGoogle(
+                                  onPresionado: estado.maybeWhen(
+                                    cargando: () => null,
+                                    orElse: () => () => ref
+                                        .read(viewModelAuthProvider.notifier)
+                                        .loginConGoogle(),
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                TextButton(
+                                  onPressed: () => context.push(Rutas.registro),
+                                  child: RichText(
+                                    textAlign: TextAlign.center,
+                                    text: TextSpan(
+                                      style:
+                                          tema.textTheme.titleMedium?.copyWith(
+                                        color: ColoresApp.primario,
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 19,
+                                      ),
+                                      children: const [
+                                        TextSpan(text: 'No tienes cuenta '),
+                                        TextSpan(
+                                          text: 'Regístrate',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
