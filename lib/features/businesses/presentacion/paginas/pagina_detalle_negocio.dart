@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/enrutador.dart';
 import '../../../../app/theme/colores.dart';
-import '../../../../app/widgets/logo_aionstyle.dart';
 import '../modelos_vista/datos_negocios_mock.dart';
 import '../modelos_vista/negocio_vista.dart';
 
@@ -31,6 +30,7 @@ class PaginaDetalleNegocio extends StatelessWidget {
 
     final tema = Theme.of(context);
     return Scaffold(
+      backgroundColor: ColoresApp.primario,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -87,7 +87,7 @@ class PaginaDetalleNegocio extends StatelessWidget {
                   Text(
                     'Barberos disponibles',
                     style: tema.textTheme.titleSmall?.copyWith(
-                      color: ColoresApp.primario,
+                      color: ColoresApp.secundario,
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
                     ),
@@ -120,8 +120,6 @@ class _BloqueHeroNegocio extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _LogoEmpresa(),
-        const SizedBox(height: 8),
         Text(
           negocio.nombre,
           style: tema.textTheme.titleLarge?.copyWith(
@@ -131,15 +129,34 @@ class _BloqueHeroNegocio extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 6,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _TagInfo(icono: Icons.location_on_outlined, texto: negocio.ubicacion),
-            _TagInfo(icono: Icons.schedule_outlined, texto: negocio.horarios),
             _TagInfo(
-              icono: Icons.star_rounded,
-              texto: '${negocio.calificacion.toStringAsFixed(1)} (${negocio.totalCalificaciones})',
+              icono: Icons.location_on_outlined,
+              etiqueta: 'Ubicacion',
+              texto: negocio.ubicacion,
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: _TagInfo(
+                    icono: Icons.schedule_outlined,
+                    etiqueta: 'Horarios',
+                    texto: negocio.horarios,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _TagInfo(
+                    icono: Icons.star_rounded,
+                    etiqueta: 'Calificacion',
+                    texto:
+                        '${negocio.calificacion.toStringAsFixed(1)} (${negocio.totalCalificaciones})',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -174,9 +191,16 @@ class _TarjetaBarberoDetalle extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: ColoresApp.secundario,
+        color: ColoresApp.terceario,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColoresApp.terceario.withValues(alpha: 0.2)),
+        border: Border.all(color: ColoresApp.dorado.withValues(alpha: 0.45)),
+        boxShadow: [
+          BoxShadow(
+            color: ColoresApp.primario.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,15 +301,16 @@ class _EstrellasCalificacion extends StatelessWidget {
                 : (i == completas && media)
                     ? Icons.star_half_rounded
                     : Icons.star_border_rounded,
-            color: ColoresApp.acento,
+            color: ColoresApp.primario,
             size: 14,
           ),
         const SizedBox(width: 4),
         Text(
           calificacion.toStringAsFixed(1),
           style: tema.textTheme.bodySmall?.copyWith(
-            color: ColoresApp.textoClaro,
+            color: ColoresApp.primario,
             fontSize: 10,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -294,49 +319,76 @@ class _EstrellasCalificacion extends StatelessWidget {
 }
 
 class _TagInfo extends StatelessWidget {
-  const _TagInfo({required this.icono, required this.texto});
+  const _TagInfo({
+    required this.icono,
+    required this.etiqueta,
+    required this.texto,
+  });
 
   final IconData icono;
+  final String etiqueta;
   final String texto;
 
   @override
   Widget build(BuildContext context) {
+    final tema = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      padding: const EdgeInsets.fromLTRB(8, 6, 10, 6),
       decoration: BoxDecoration(
-        color: ColoresApp.secundario.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: ColoresApp.secundario.withValues(alpha: 0.24)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icono, size: 12, color: ColoresApp.secundario),
-          const SizedBox(width: 4),
-          Text(
-            texto,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: ColoresApp.secundario,
-                  fontSize: 10,
-                ),
+        color: ColoresApp.primario.withValues(alpha: 0.36),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: ColoresApp.dorado.withValues(alpha: 0.55)),
+        boxShadow: [
+          BoxShadow(
+            color: ColoresApp.primario.withValues(alpha: 0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _LogoEmpresa extends StatelessWidget {
-  const _LogoEmpresa();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 86,
-      height: 32,
-      child: LogoAionStyle(
-        ajuste: BoxFit.cover,
-        borde: BorderRadius.all(Radius.circular(10)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            decoration: const BoxDecoration(
+              color: ColoresApp.terceario,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icono, size: 12, color: ColoresApp.primario),
+          ),
+          const SizedBox(width: 7),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  etiqueta,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: tema.textTheme.labelSmall?.copyWith(
+                    color: ColoresApp.dorado,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.25,
+                  ),
+                ),
+                Text(
+                  texto,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: tema.textTheme.bodySmall?.copyWith(
+                    color: ColoresApp.secundario,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

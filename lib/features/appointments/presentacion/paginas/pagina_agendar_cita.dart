@@ -24,6 +24,7 @@ class PaginaAgendarCita extends StatefulWidget {
 
 class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
   final _formKey = GlobalKey<FormState>();
+  int _panelActivo = 0;
   DateTime? _fechaSeleccionada;
   TimeOfDay? _horaSeleccionada;
   MetodoPagoCita _metodoPago = MetodoPagoCita.efectivo;
@@ -190,9 +191,8 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
-    final esOscuro = tema.brightness == Brightness.dark;
     return Scaffold(
+      backgroundColor: ColoresApp.secundario,
       appBar: AppBar(title: const Text('Agendar cita')),
       body: Form(
         key: _formKey,
@@ -202,7 +202,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
             Text(
               'Reserva con ${widget.barberoNombre}',
               style: tema.textTheme.titleMedium?.copyWith(
-                color: esquema.onSurface,
+                color: ColoresApp.primario,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -210,172 +210,234 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
             Text(
               widget.negocioNombre,
               style: tema.textTheme.bodySmall?.copyWith(
-                color: esquema.onSurfaceVariant,
+                color: ColoresApp.textoClaro,
                 fontSize: 12,
               ),
             ),
             const SizedBox(height: 16),
-            _TarjetaFormulario(
-              titulo: 'Corte del cliente',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DropdownButtonFormField<String>(
-                    initialValue: _corteSeleccionado,
-                    decoration: const InputDecoration(
-                      hintText: 'Selecciona un corte',
-                    ),
-                    items: _cortesConPrecio.entries.map((entrada) {
-                      return DropdownMenuItem<String>(
-                        value: entrada.key,
-                        child: Text('${entrada.key} - USD ${entrada.value.toStringAsFixed(2)}'),
-                      );
-                    }).toList(),
-                    onChanged: (valor) {
-                      setState(() {
-                        _corteSeleccionado = valor;
-                      });
-                    },
-                    validator: (valor) {
-                      if (valor == null || valor.isEmpty) {
-                        return 'Selecciona un corte';
-                      }
-                      return null;
-                    },
+            ExpansionPanelList.radio(
+              initialOpenPanelValue: _panelActivo,
+              elevation: 0,
+              expandedHeaderPadding: EdgeInsets.zero,
+              dividerColor: Colors.transparent,
+              animationDuration: const Duration(milliseconds: 220),
+              expansionCallback: (_, __) {},
+              children: [
+                ExpansionPanelRadio(
+                  value: 0,
+                  canTapOnHeader: true,
+                  backgroundColor: ColoresApp.secundario,
+                  headerBuilder: (context, isExpanded) => _encabezadoSeccion(
+                    titulo: 'Corte del cliente',
+                    abierto: isExpanded,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _corteSeleccionado == null
-                        ? 'Precio pendiente'
-                        : 'Precio del corte: USD ${_precioSeleccionado.toStringAsFixed(2)}',
-                    style: tema.textTheme.bodySmall?.copyWith(
-                      color: esquema.onSurfaceVariant,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            _TarjetaFormulario(
-              titulo: 'Fecha de cita',
-              child: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_month_outlined),
-                title: Text(
-                  _fechaTexto == 'Pendiente' ? 'Seleccionar fecha' : _fechaTexto,
-                  style: tema.textTheme.bodyMedium,
-                ),
-                subtitle: Text(
-                  'Ver disponibilidad del barbero',
-                  style: tema.textTheme.bodySmall,
-                ),
-                trailing: TextButton.icon(
-                  onPressed: _seleccionarFecha,
-                  icon: const Icon(Icons.calendar_month_outlined, size: 16),
-                  label: const Text('Elegir'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    side: BorderSide(
-                      color: esquema.onSurfaceVariant.withValues(alpha: 0.5),
-                    ),
-                    foregroundColor: esquema.onSurface,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            _TarjetaFormulario(
-              titulo: 'Hora de llegada',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.access_time_outlined),
-                    title: Text(
-                      _horaTexto == 'Pendiente' ? 'Seleccionar hora' : _horaTexto,
-                      style: tema.textTheme.bodyMedium,
-                    ),
-                    subtitle: Text(
-                      'Disponibilidad segun fecha elegida',
-                      style: tema.textTheme.bodySmall,
-                    ),
-                    trailing: TextButton.icon(
-                      onPressed: _seleccionarHora,
-                      icon: const Icon(Icons.schedule_outlined, size: 16),
-                      label: const Text('Elegir'),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        side: BorderSide(
-                          color: esquema.onSurfaceVariant.withValues(alpha: 0.5),
+                  body: _cuerpoSeccion(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DropdownButtonFormField<String>(
+                          initialValue: _corteSeleccionado,
+                          decoration: const InputDecoration(
+                            hintText: 'Selecciona un corte',
+                          ),
+                          items: _cortesConPrecio.entries.map((entrada) {
+                            return DropdownMenuItem<String>(
+                              value: entrada.key,
+                              child: Text(
+                                '${entrada.key} - USD ${entrada.value.toStringAsFixed(2)}',
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (valor) {
+                            setState(() {
+                              _corteSeleccionado = valor;
+                            });
+                          },
+                          validator: (valor) {
+                            if (valor == null || valor.isEmpty) {
+                              return 'Selecciona un corte';
+                            }
+                            return null;
+                          },
                         ),
-                        foregroundColor: esquema.onSurface,
+                        const SizedBox(height: 8),
+                        Text(
+                          _corteSeleccionado == null
+                              ? 'Precio pendiente'
+                              : 'Precio del corte: USD ${_precioSeleccionado.toStringAsFixed(2)}',
+                          style: tema.textTheme.bodySmall?.copyWith(
+                            color: ColoresApp.textoClaro,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                ExpansionPanelRadio(
+                  value: 1,
+                  canTapOnHeader: true,
+                  backgroundColor: ColoresApp.secundario,
+                  headerBuilder: (context, isExpanded) => _encabezadoSeccion(
+                    titulo: 'Fecha de cita',
+                    abierto: isExpanded,
+                  ),
+                  body: _cuerpoSeccion(
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(
+                        Icons.calendar_month_outlined,
+                        color: ColoresApp.primario,
+                      ),
+                      title: Text(
+                        _fechaTexto == 'Pendiente'
+                            ? 'Seleccionar fecha'
+                            : _fechaTexto,
+                        style: tema.textTheme.bodyMedium,
+                      ),
+                      subtitle: Text(
+                        'Ver disponibilidad del barbero',
+                        style: tema.textTheme.bodySmall,
+                      ),
+                      trailing: TextButton.icon(
+                        onPressed: _seleccionarFecha,
+                        icon: const Icon(Icons.calendar_month_outlined, size: 16),
+                        label: const Text('Elegir'),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                          side: BorderSide(
+                            color: ColoresApp.primario.withValues(alpha: 0.45),
+                          ),
+                          foregroundColor: ColoresApp.primario,
+                        ),
                       ),
                     ),
                   ),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: _horasDisponibles.take(8).map((hora) {
-                      return Chip(
-                        label: Text(hora.format(context)),
-                        backgroundColor: esOscuro
-                            ? ColoresApp.primario
-                            : ColoresApp.fondo,
-                        side: BorderSide(
-                          color: esquema.onSurfaceVariant.withValues(alpha: 0.35),
-                        ),
-                      );
-                    }).toList(),
+                ),
+                ExpansionPanelRadio(
+                  value: 2,
+                  canTapOnHeader: true,
+                  backgroundColor: ColoresApp.secundario,
+                  headerBuilder: (context, isExpanded) => _encabezadoSeccion(
+                    titulo: 'Hora de llegada',
+                    abierto: isExpanded,
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            _TarjetaFormulario(
-              titulo: 'Metodo de pago',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SegmentedButton<MetodoPagoCita>(
-                    showSelectedIcon: false,
-                    style: ButtonStyle(
-                      foregroundColor: WidgetStateProperty.resolveWith((states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return ColoresApp.secundario;
-                        }
-                        return ColoresApp.primario;
-                      }),
-                      backgroundColor: WidgetStateProperty.resolveWith((states) {
-                        if (states.contains(WidgetState.selected)) {
+                  body: _cuerpoSeccion(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.access_time_outlined,
+                            color: ColoresApp.primario,
+                          ),
+                          title: Text(
+                            _horaTexto == 'Pendiente'
+                                ? 'Seleccionar hora'
+                                : _horaTexto,
+                            style: tema.textTheme.bodyMedium,
+                          ),
+                          subtitle: Text(
+                            'Disponibilidad segun fecha elegida',
+                            style: tema.textTheme.bodySmall,
+                          ),
+                          trailing: TextButton.icon(
+                            onPressed: _seleccionarHora,
+                            icon: const Icon(Icons.schedule_outlined, size: 16),
+                            label: const Text('Elegir'),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              side: BorderSide(
+                                color:
+                                    ColoresApp.primario.withValues(alpha: 0.45),
+                              ),
+                              foregroundColor: ColoresApp.primario,
+                            ),
+                          ),
+                        ),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: _horasDisponibles.take(8).map((hora) {
+                            return Chip(
+                              label: Text(
+                                hora.format(context),
+                                style: tema.textTheme.bodySmall?.copyWith(
+                                  color: ColoresApp.primario,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              backgroundColor: ColoresApp.fondo,
+                              side: BorderSide(
+                                color:
+                                    ColoresApp.primario.withValues(alpha: 0.25),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                ExpansionPanelRadio(
+                  value: 3,
+                  canTapOnHeader: true,
+                  backgroundColor: ColoresApp.secundario,
+                  headerBuilder: (context, isExpanded) => _encabezadoSeccion(
+                    titulo: 'Metodo de pago',
+                    abierto: isExpanded,
+                  ),
+                  body: _cuerpoSeccion(
+                    SegmentedButton<MetodoPagoCita>(
+                      showSelectedIcon: false,
+                      style: ButtonStyle(
+                        foregroundColor:
+                            WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return ColoresApp.secundario;
+                          }
                           return ColoresApp.primario;
-                        }
-                        return ColoresApp.secundario;
-                      }),
-                      side: WidgetStateProperty.all(
-                        BorderSide(color: ColoresApp.terceario.withValues(alpha: 0.25)),
+                        }),
+                        backgroundColor:
+                            WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return ColoresApp.primario;
+                          }
+                          return ColoresApp.secundario;
+                        }),
+                        side: WidgetStateProperty.all(
+                          BorderSide(
+                            color: ColoresApp.primario.withValues(alpha: 0.28),
+                          ),
+                        ),
                       ),
+                      segments: const [
+                        ButtonSegment<MetodoPagoCita>(
+                          value: MetodoPagoCita.efectivo,
+                          label: Text('Efectivo'),
+                        ),
+                        ButtonSegment<MetodoPagoCita>(
+                          value: MetodoPagoCita.visa,
+                          label: Text('Visa'),
+                        ),
+                      ],
+                      selected: {_metodoPago},
+                      onSelectionChanged: (valores) {
+                        setState(() {
+                          _metodoPago = valores.first;
+                        });
+                      },
                     ),
-                    segments: const [
-                      ButtonSegment<MetodoPagoCita>(
-                        value: MetodoPagoCita.efectivo,
-                        label: Text('Efectivo'),
-                      ),
-                      ButtonSegment<MetodoPagoCita>(
-                        value: MetodoPagoCita.visa,
-                        label: Text('Visa'),
-                      ),
-                    ],
-                    selected: {_metodoPago},
-                    onSelectionChanged: (valores) {
-                      setState(() {
-                        _metodoPago = valores.first;
-                      });
-                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             _TarjetaFormulario(
@@ -403,6 +465,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColoresApp.primario,
                 foregroundColor: ColoresApp.secundario,
+                minimumSize: const Size.fromHeight(52),
               ),
               child: const Text('Confirmar cita'),
             ),
@@ -412,20 +475,57 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
     );
   }
 
+  Widget _encabezadoSeccion({required String titulo, required bool abierto}) {
+    final tema = Theme.of(context);
+    return ListTile(
+      tileColor: ColoresApp.fondo,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: ColoresApp.primario.withValues(alpha: 0.18)),
+      ),
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              titulo,
+              style: tema.textTheme.labelLarge?.copyWith(
+                color: ColoresApp.primario,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const _BadgeRequerido(),
+        ],
+      ),
+    );
+  }
+
+  Widget _cuerpoSeccion(Widget child) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      decoration: BoxDecoration(
+        color: ColoresApp.secundario,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+        border: Border.all(color: ColoresApp.primario.withValues(alpha: 0.12)),
+      ),
+      child: child,
+    );
+  }
+
   Widget _filaResumen(String etiqueta, String valor) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
-    final esOscuro = tema.brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 7),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: esOscuro ? ColoresApp.primario : ColoresApp.fondo,
+        color: ColoresApp.fondo,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: esquema.onSurfaceVariant.withValues(alpha: esOscuro ? 0.35 : 0.2),
-        ),
       ),
       child: Row(
         children: [
@@ -433,7 +533,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
             child: Text(
               etiqueta,
               style: tema.textTheme.bodySmall?.copyWith(
-                color: esquema.onSurfaceVariant,
+                color: ColoresApp.textoClaro,
                 fontSize: 10,
               ),
             ),
@@ -443,7 +543,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
               valor,
               textAlign: TextAlign.end,
               style: tema.textTheme.bodySmall?.copyWith(
-                color: esquema.onSurface,
+                color: ColoresApp.primario,
                 fontWeight: FontWeight.w700,
                 fontSize: 11,
               ),
@@ -464,15 +564,13 @@ class _TarjetaFormulario extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
-    final esOscuro = tema.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: esOscuro ? ColoresApp.primario : ColoresApp.secundario,
+        color: ColoresApp.secundario,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: ColoresApp.terceario.withValues(alpha: esOscuro ? 0.45 : 0.2),
+          color: ColoresApp.primario.withValues(alpha: 0.12),
         ),
       ),
       child: Column(
@@ -481,7 +579,7 @@ class _TarjetaFormulario extends StatelessWidget {
           Text(
             titulo,
             style: tema.textTheme.labelLarge?.copyWith(
-              color: esquema.onSurface,
+              color: ColoresApp.primario,
               fontWeight: FontWeight.w700,
               fontSize: 12,
             ),
@@ -489,6 +587,29 @@ class _TarjetaFormulario extends StatelessWidget {
           const SizedBox(height: 8),
           child,
         ],
+      ),
+    );
+  }
+}
+
+class _BadgeRequerido extends StatelessWidget {
+  const _BadgeRequerido();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: ColoresApp.primario,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        'Requerido',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: ColoresApp.secundario,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+            ),
       ),
     );
   }

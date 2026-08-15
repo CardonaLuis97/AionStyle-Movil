@@ -11,10 +11,14 @@ class VistaNegocios extends StatefulWidget {
     super.key,
     required this.titulo,
     this.mostrarEncabezado = true,
+    this.mostrarBuscador = true,
+    this.busquedaExterna = '',
   });
 
   final String titulo;
   final bool mostrarEncabezado;
+  final bool mostrarBuscador;
+  final String busquedaExterna;
 
   @override
   State<VistaNegocios> createState() => _VistaNegociosState();
@@ -37,7 +41,11 @@ class _VistaNegociosState extends State<VistaNegocios> {
         .where((negocio) => negocio.categoria == _categoriaActiva)
         .toList();
 
-    final busqueda = _busquedaCtrl.text.trim().toLowerCase();
+    final busqueda = (widget.mostrarBuscador
+        ? _busquedaCtrl.text
+        : widget.busquedaExterna)
+      .trim()
+      .toLowerCase();
     final resultadosNegocios = busqueda.isEmpty
         ? negociosCategoria
         : negociosCategoria.where((negocio) {
@@ -56,9 +64,11 @@ class _VistaNegociosState extends State<VistaNegocios> {
           }).toList();
 
     return SafeArea(
-      child: ListView(
+      child: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           if (widget.mostrarEncabezado) ...[
             Text(
               widget.titulo,
@@ -78,32 +88,45 @@ class _VistaNegociosState extends State<VistaNegocios> {
             const SizedBox(height: 14),
           ],
           _buildSelectorCategoria(tema),
-          const SizedBox(height: 12),
-          _buildBuscador(tema),
-          const SizedBox(height: 20),
-          Text(
-            _categoriaActiva == CategoriaNegocioVista.barberia
-                ? 'Barberias'
-                : 'Salones de belleza',
-            style: tema.textTheme.titleSmall?.copyWith(
-              color: ColoresApp.primario,
-              fontWeight: FontWeight.w700,
-              fontSize: 15,
-            ),
-          ),
-          const SizedBox(height: 10),
-          if (resultadosNegocios.isEmpty)
-            _buildSinResultados(tema, 'No se encontraron negocios para esta busqueda.')
-          else
-            ...resultadosNegocios.map(
-              (negocio) => _TarjetaNegocio(
-                negocio: negocio,
-                onTap: () {
-                  context.push('${Rutas.negocios}/${negocio.id}');
-                },
+          if (widget.mostrarBuscador) ...[
+            const SizedBox(height: 12),
+            _buildBuscador(tema),
+          ],
+            const SizedBox(height: 14),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  Text(
+                    _categoriaActiva == CategoriaNegocioVista.barberia
+                        ? 'Barberias'
+                        : 'Salones de belleza',
+                    style: tema.textTheme.titleSmall?.copyWith(
+                      color: ColoresApp.primario,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (resultadosNegocios.isEmpty)
+                    _buildSinResultados(
+                      tema,
+                      'No se encontraron negocios para esta busqueda.',
+                    )
+                  else
+                    ...resultadosNegocios.map(
+                      (negocio) => _TarjetaNegocio(
+                        negocio: negocio,
+                        onTap: () {
+                          context.push('${Rutas.negocios}/${negocio.id}');
+                        },
+                      ),
+                    ),
+                ],
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -111,7 +134,7 @@ class _VistaNegociosState extends State<VistaNegocios> {
   Widget _buildSelectorCategoria(ThemeData tema) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: ColoresApp.secundario,
+        color: ColoresApp.terceario,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: ColoresApp.terceario.withValues(alpha: 0.25),
@@ -123,12 +146,14 @@ class _VistaNegociosState extends State<VistaNegocios> {
           children: [
             Expanded(
               child: _BotonCategoria(
-                etiqueta: 'Barberia',
+                etiqueta: 'Barberias',
                 activa: _categoriaActiva == CategoriaNegocioVista.barberia,
                 onTap: () {
                   setState(() {
                     _categoriaActiva = CategoriaNegocioVista.barberia;
-                    _busquedaCtrl.clear();
+                    if (widget.mostrarBuscador) {
+                      _busquedaCtrl.clear();
+                    }
                   });
                 },
               ),
@@ -136,12 +161,14 @@ class _VistaNegociosState extends State<VistaNegocios> {
             const SizedBox(width: 6),
             Expanded(
               child: _BotonCategoria(
-                etiqueta: 'Salon de belleza',
+                etiqueta: 'Salones de belleza',
                 activa: _categoriaActiva == CategoriaNegocioVista.salonBelleza,
                 onTap: () {
                   setState(() {
                     _categoriaActiva = CategoriaNegocioVista.salonBelleza;
-                    _busquedaCtrl.clear();
+                    if (widget.mostrarBuscador) {
+                      _busquedaCtrl.clear();
+                    }
                   });
                 },
               ),
@@ -232,7 +259,7 @@ class _BotonCategoria extends StatelessWidget {
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
     return Material(
-      color: activa ? ColoresApp.primario : ColoresApp.secundario,
+      color: activa ? ColoresApp.primario : ColoresApp.terceario,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         onTap: onTap,
@@ -274,12 +301,12 @@ class _TarjetaNegocio extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: ColoresApp.secundario,
+          color: ColoresApp.terceario,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: ColoresApp.terceario.withValues(alpha: 0.2)),
+          border: Border.all(color: ColoresApp.dorado.withValues(alpha: 0.4)),
           boxShadow: [
             BoxShadow(
-              color: ColoresApp.terceario.withValues(alpha: 0.12),
+              color: ColoresApp.primario.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -320,20 +347,27 @@ class _TarjetaNegocio extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text(
-              negocio.nombre,
-              style: tema.textTheme.titleSmall?.copyWith(
-                color: ColoresApp.primario,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    negocio.nombre,
+                    style: tema.textTheme.titleSmall?.copyWith(
+                      color: ColoresApp.primario,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _calificacionConEstrellas(context),
+              ],
             ),
             const SizedBox(height: 6),
             _detalleFila(context, Icons.location_on_outlined, 'Ubicacion', negocio.ubicacion),
             _detalleFila(context, Icons.schedule_outlined, 'Horarios', negocio.horarios),
             _detalleFila(context, Icons.build_outlined, 'Servicios', negocio.servicios.join(', ')),
-            const SizedBox(height: 4),
-            _calificacionConEstrellas(context),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -359,24 +393,32 @@ class _TarjetaNegocio extends StatelessWidget {
     final estrellasCompletas = negocio.calificacion.floor();
     final tieneMedia = (negocio.calificacion - estrellasCompletas) >= 0.5;
 
-    return Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        for (var i = 0; i < 5; i++)
-          Icon(
-            i < estrellasCompletas
-                ? Icons.star_rounded
-                : (i == estrellasCompletas && tieneMedia)
-                    ? Icons.star_half_rounded
-                    : Icons.star_border_rounded,
-            color: ColoresApp.acento,
-            size: 16,
-          ),
-        const SizedBox(width: 6),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < 5; i++)
+              Icon(
+                i < estrellasCompletas
+                    ? Icons.star_rounded
+                    : (i == estrellasCompletas && tieneMedia)
+                        ? Icons.star_half_rounded
+                        : Icons.star_border_rounded,
+                color: ColoresApp.primario,
+                size: 15,
+              ),
+          ],
+        ),
+        const SizedBox(height: 2),
         Text(
-          '${negocio.calificacion} (${negocio.totalCalificaciones})',
+          '${negocio.calificacion.toStringAsFixed(1)} (${negocio.totalCalificaciones}) clientes',
           style: tema.textTheme.bodySmall?.copyWith(
-            color: ColoresApp.textoClaro,
-            fontSize: 11,
+            color: ColoresApp.primario,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -435,12 +477,19 @@ class _LogoEmpresa extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 86,
-      height: 32,
-      child: LogoAionStyle(
-        ajuste: BoxFit.cover,
-        borde: BorderRadius.all(Radius.circular(10)),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      decoration: BoxDecoration(
+        color: ColoresApp.primario,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const SizedBox(
+        width: 58,
+        height: 18,
+        child: LogoAionStyle(
+          ajuste: BoxFit.contain,
+          borde: BorderRadius.all(Radius.circular(6)),
+        ),
       ),
     );
   }
