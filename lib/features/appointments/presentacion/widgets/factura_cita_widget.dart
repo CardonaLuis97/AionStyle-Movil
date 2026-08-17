@@ -54,7 +54,7 @@ class FacturaCitaWidget extends StatelessWidget {
               ),
               SizedBox(
                 width: 120,
-                height: 34,
+                height: 60,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.asset(
@@ -133,7 +133,7 @@ class FacturaCitaWidget extends StatelessWidget {
             child: Text(
               etiqueta,
               style: const TextStyle(
-                color: ColoresApp.terceario,
+                color: ColoresApp.primario,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),

@@ -37,7 +37,7 @@ const List<NegocioVista> negociosMockVista = [
     nombre: 'Barberia Black',
     categoria: CategoriaNegocioVista.barberia,
     imagenUrl:
-        'https://images.unsplash.com/photo-1512690459411-b0fd1c86b8ec?auto=format&fit=crop&w=1200&q=60',
+        'https://images.pexels.com/photos/7518746/pexels-photo-7518746.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
     ubicacion: 'Av. Central 45-20',
     horarios: 'Lun - Dom 10:00 a 22:00',
     servicios: ['Corte moderno', 'Diseno de barba'],

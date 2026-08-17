@@ -62,7 +62,12 @@ class _PaginaCitasState extends ConsumerState<PaginaCitas> {
     final citas = _citasPorFiltro();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mis Citas')),
+      backgroundColor: ColoresApp.secundario,
+      appBar: AppBar(
+        title: const Text('Mis Citas'),
+        backgroundColor: ColoresApp.primario,
+        foregroundColor: ColoresApp.secundario,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -98,18 +103,16 @@ class _PaginaCitasState extends ConsumerState<PaginaCitas> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: tema.brightness == Brightness.dark
-                    ? ColoresApp.primario
-                    : ColoresApp.secundario,
+                color: ColoresApp.secundario,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: esquema.onSurfaceVariant.withValues(alpha: 0.25),
+                  color: ColoresApp.primario.withValues(alpha: 0.18),
                 ),
               ),
               child: Text(
                 _mensajeVacio(),
                 style: tema.textTheme.bodyMedium?.copyWith(
-                  color: esquema.onSurfaceVariant,
+                  color: ColoresApp.primario,
                 ),
               ),
             )
@@ -351,16 +354,14 @@ class _TarjetaCita extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
-    final esOscuro = tema.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: esOscuro ? ColoresApp.primario : ColoresApp.secundario,
+        color: ColoresApp.secundario,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: esquema.onSurfaceVariant.withValues(alpha: esOscuro ? 0.4 : 0.2),
+          color: ColoresApp.primario.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -410,20 +411,20 @@ class _TarjetaCita extends StatelessWidget {
                       cita.negocioNombre,
                       style: tema.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: esquema.onSurface,
+                        color: ColoresApp.primario,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Fecha: ${cita.fecha}  ${cita.hora}',
                       style: tema.textTheme.bodySmall?.copyWith(
-                        color: esquema.onSurfaceVariant,
+                        color: ColoresApp.textoClaro,
                       ),
                     ),
                     Text(
                       'Corte: ${cita.corte}',
                       style: tema.textTheme.bodySmall?.copyWith(
-                        color: esquema.onSurfaceVariant,
+                        color: ColoresApp.textoClaro,
                       ),
                     ),
                   ],
@@ -434,7 +435,7 @@ class _TarjetaCita extends StatelessWidget {
                 'USD ${cita.precio.toStringAsFixed(2)}',
                 style: tema.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: esquema.onSurface,
+                  color: ColoresApp.primario,
                 ),
               ),
             ],
@@ -445,6 +446,10 @@ class _TarjetaCita extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: onVerDetalle,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: ColoresApp.primario,
+                    side: const BorderSide(color: ColoresApp.primario),
+                  ),
                   child: const Text('Ver detalle'),
                 ),
               ),
@@ -453,6 +458,10 @@ class _TarjetaCita extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: onOpinar,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColoresApp.primario,
+                      foregroundColor: ColoresApp.secundario,
+                    ),
                     child: const Text('Opinar'),
                   ),
                 ),
@@ -480,19 +489,27 @@ class _BotonFiltro extends StatelessWidget {
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
     return Material(
-      color: activo ? ColoresApp.primario : ColoresApp.secundario,
+      color: activo
+          ? ColoresApp.primario
+          : ColoresApp.secundario,
       borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Center(
-            child: Text(
-              titulo,
-              style: tema.textTheme.labelLarge?.copyWith(
-                color: activo ? ColoresApp.secundario : ColoresApp.primario,
-                fontWeight: FontWeight.w700,
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: ColoresApp.primario, width: 1),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Center(
+              child: Text(
+                titulo,
+                style: tema.textTheme.labelLarge?.copyWith(
+                  color: activo ? ColoresApp.secundario : ColoresApp.primario,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),

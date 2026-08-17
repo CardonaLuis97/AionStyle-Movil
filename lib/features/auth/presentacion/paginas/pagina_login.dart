@@ -83,12 +83,12 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                   Column(
                     children: [
                       const SizedBox(height: 24),
-                      const LogoAionStyle(ancho: 420, alto: 348),
+                      const LogoAionStyle(ancho: 420, alto: 248),
                       const SizedBox(height: 8),
                       Center(
                         child: Container(
                           width: anchoCard,
-                          margin: const EdgeInsets.only(top: 2, bottom: 28),
+                          margin: const EdgeInsets.only(top: 30, bottom: 12),
                           padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
                           decoration: const BoxDecoration(
                             color: ColoresApp.acento,

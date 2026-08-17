@@ -175,22 +175,30 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
     final propuesta = await showTimePicker(
       context: context,
       initialTime: disponible.first,
+      initialEntryMode: TimePickerEntryMode.dial,
       helpText: 'Selecciona hora de llegada',
       builder: (context, child) {
         final tema = Theme.of(context);
         final esquema = tema.colorScheme;
-        return Theme(
-          data: tema.copyWith(
-            colorScheme: esquema.copyWith(
-              surface: tema.brightness == Brightness.dark
-                  ? ColoresApp.primario
-                  : ColoresApp.secundario,
-              onSurface: tema.brightness == Brightness.dark
-                  ? ColoresApp.secundario
-                  : ColoresApp.texto,
+        return Localizations.override(
+          context: context,
+          locale: const Locale('en', 'US'),
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+            child: Theme(
+              data: tema.copyWith(
+                colorScheme: esquema.copyWith(
+                  surface: tema.brightness == Brightness.dark
+                      ? ColoresApp.primario
+                      : ColoresApp.secundario,
+                  onSurface: tema.brightness == Brightness.dark
+                      ? ColoresApp.secundario
+                      : ColoresApp.texto,
+                ),
+              ),
+              child: child ?? const SizedBox.shrink(),
             ),
           ),
-          child: child ?? const SizedBox.shrink(),
         );
       },
     );
