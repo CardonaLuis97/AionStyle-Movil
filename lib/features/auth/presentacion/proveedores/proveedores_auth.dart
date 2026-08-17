@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import '../../../../app/config/configuracion_app.dart';
 import '../../../../core/providers/proveedores_core.dart';
 import '../../datos/fuentes_de_datos/fuente_auth_local.dart';
 import '../../datos/repositorios/repositorio_auth_impl.dart';
@@ -23,7 +22,8 @@ final repositorioAuthProvider = Provider<RepositorioAuth>((ref) {
   return RepositorioAuthImpl(
     fuenteLocal: ref.watch(fuenteAuthLocalProvider),
     almacenamiento: ref.watch(almacenamientoSeguroProvider),
-    googleSignIn: GoogleSignIn(clientId: ConfiguracionApp.googleClientIdWeb),
+    // Sin clientId hasta habilitar Google Sign-In con credenciales reales.
+    googleSignIn: GoogleSignIn(),
   );
 });
 
