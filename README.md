@@ -2,6 +2,9 @@
 
 Aplicación Flutter para gestión de barberías: reserva de citas, pagos, QR y panel de barbero/propietario.
 
+Guia de lanzamiento Android/Play Store:
+- Ver `README_DESPLIEGUE_ANDROID.md`
+
 ---
 
 ## 🚀 Setup inicial
