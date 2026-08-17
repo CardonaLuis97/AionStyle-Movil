@@ -48,6 +48,7 @@ dependencies:
   cached_network_image: ^3.4.1
   shimmer: ^3.0.0
   lottie: ^3.1.2
+  package_info_plus: ^8.0.2
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +61,7 @@ dev_dependencies:
 
   # Linting
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
   # custom_lint y riverpod_lint desactivados por incompatibilidad con analyzer 7.6 (Dart 3.13)
   # custom_lint: ^0.7.3
   # riverpod_lint: ^2.4.3
@@ -84,3 +86,7 @@ flutter:
           weight: 600
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
+
+flutter_launcher_icons:
+  android: true
+  image_path_android: assets/images/logo.png

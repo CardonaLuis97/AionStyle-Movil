@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../../../app/theme/colores.dart';
 import '../../../../app/router/enrutador.dart';
 import '../../../../app/widgets/logo_aionstyle.dart';
@@ -23,6 +24,30 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _contrasenaCtrl = TextEditingController();
+  String? _versionApp;
+
+  String get _textoVersion {
+    if (_versionApp == null || _versionApp!.isEmpty) return '';
+    return 'v$_versionApp';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarVersionApp();
+  }
+
+  Future<void> _cargarVersionApp() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (!mounted) return;
+      setState(() {
+        _versionApp = info.version;
+      });
+    } catch (_) {
+      // Si falla la lectura desde plataforma, se oculta el texto de version.
+    }
+  }
 
   @override
   void dispose() {
@@ -222,6 +247,24 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                         ),
                       ),
                     ],
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 10,
+                    child: Center(
+                      child: Visibility(
+                        visible: _textoVersion.isNotEmpty,
+                        child: Text(
+                          _textoVersion,
+                          style: tema.textTheme.labelSmall?.copyWith(
+                            color: ColoresApp.primario.withValues(alpha: 0.45),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

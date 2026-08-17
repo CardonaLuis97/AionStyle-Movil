@@ -43,17 +43,34 @@ Notas:
 - `android/key.properties` no debe subirse al repositorio.
 - `upload-keystore.jks` no debe subirse al repositorio.
 
-## 4) Versionado para Play Store
+## 4) Versionado para Play Store y para el login
 
-Edita `pubspec.yaml` y aumenta la version:
+Edita `pubspec.yaml` en esta linea:
 
 ```yaml
-version: 1.0.1+2
+version: X.Y.Z+N
 ```
 
-Regla:
-- `versionName` = parte antes de `+` (ej: `1.0.1`)
-- `versionCode` = numero despues de `+` (ej: `2`) y siempre debe aumentar
+Significado:
+- `X.Y.Z` = version visible para usuario (en login se muestra como `vX.Y.Z`)
+- `N` = build interno para Play Store (`versionCode`) y siempre debe aumentar
+
+Reglas obligatorias antes de cada subida:
+- Si subes una nueva release a Play Store, aumenta `N` siempre (nunca repetirlo).
+- Si hubo cambios funcionales visibles para usuarios, aumenta tambien `X.Y.Z`.
+- Si solo fue ajuste interno sin impacto visible, puedes mantener `X.Y.Z` y subir solo `N`.
+
+Ejemplos reales de despliegue:
+- Release inicial: `version: 1.0.0+1` -> login muestra `v1.0.0`
+- Correccion menor: `version: 1.0.1+2` -> login muestra `v1.0.1`
+- Nueva funcionalidad: `version: 1.1.0+3` -> login muestra `v1.1.0`
+- Cambio grande: `version: 2.0.0+10` -> login muestra `v2.0.0`
+
+Checklist rapido de versionado por release:
+1. Editar `pubspec.yaml` y actualizar `version: X.Y.Z+N`.
+2. Validar que `N` sea mayor al ultimo subido en Play Console.
+3. Ejecutar `flutter pub get`.
+4. Generar AAB release.
 
 ## 5) Configuracion de Android ya preparada
 
