@@ -95,6 +95,7 @@ Consulta y aplica siempre estas skills:
 
 - **visual-aionstyle** → para toda decisión de diseño y colores
 - **apis-aionstyle** → para todo endpoint o fuente de datos
+- **versionado-aionstyle** → para cada cambio de versión (pubspec + versión visible en login)
 
 ---
 
@@ -103,6 +104,7 @@ Consulta y aplica siempre estas skills:
 - En cada respuesta al usuario, dirigirse por su nombre: **Luis**
 - Priorizar siempre el agente **AionStyle Guía** para tareas de arquitectura/revisión/scaffolding
 - Aplicar siempre las skills activas cuando corresponda al tipo de cambio
+- Si el cambio incluye versión/release/Play Store, invocar siempre **versionado-aionstyle**
 
 ---
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../../../../app/config/configuracion_app.dart';
 import '../../../../app/theme/colores.dart';
 import '../../../../app/router/enrutador.dart';
 import '../../../../app/widgets/logo_aionstyle.dart';
@@ -25,11 +26,11 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _contrasenaCtrl = TextEditingController();
-  String? _versionApp;
+  String _versionApp = ConfiguracionApp.versionApp;
   bool _redirigiendoInicio = false;
 
   String get _textoVersion {
-    if (_versionApp == null || _versionApp!.isEmpty) return '';
+    if (_versionApp.isEmpty) return '';
     return 'v$_versionApp';
   }
 
@@ -43,11 +44,12 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
     try {
       final info = await PackageInfo.fromPlatform();
       if (!mounted) return;
+      if (info.version.isEmpty) return;
       setState(() {
         _versionApp = info.version;
       });
     } catch (_) {
-      // Si falla la lectura desde plataforma, se oculta el texto de version.
+      // Si falla la lectura desde plataforma, se usa ConfiguracionApp.versionApp.
     }
   }
 
