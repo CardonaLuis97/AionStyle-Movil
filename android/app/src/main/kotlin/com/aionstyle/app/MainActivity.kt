@@ -1,4 +1,4 @@
-package com.aiondex.aionstyle_movil
+package com.aionstyle.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
