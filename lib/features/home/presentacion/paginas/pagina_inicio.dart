@@ -15,6 +15,15 @@ class PaginaInicio extends ConsumerStatefulWidget {
 class _PaginaInicioState extends ConsumerState<PaginaInicio> {
   final TextEditingController _busquedaCtrl = TextEditingController();
 
+  void _mostrarNotificacionCita(BuildContext context, bool tienePendiente) {
+    final mensaje = tienePendiente
+        ? 'Tienes un corte pendiente. Acercate a la barberia para no perder tu turno.'
+        : 'No tienes citas pendientes por ahora.';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensaje)),
+    );
+  }
+
   @override
   void dispose() {
     _busquedaCtrl.dispose();
@@ -89,6 +98,7 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                             final esUsuarioDemoCliente =
                                 usuario.correo.trim().toLowerCase() ==
                                     'usuarioa@aionstyle.com';
+                            final tieneCitaPendiente = esUsuarioDemoCliente;
                             final rolPrincipal = esUsuarioDemoCliente
                                 ? 'Cliente'
                                 : (usuario.roles.isNotEmpty
@@ -131,6 +141,36 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                                   ),
                                 ),
                                 const SizedBox(width: 7),
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () => _mostrarNotificacionCita(
+                                        context,
+                                        tieneCitaPendiente,
+                                      ),
+                                      tooltip: 'Notificaciones',
+                                      icon: const Icon(
+                                        Icons.notifications_none_rounded,
+                                        color: ColoresApp.secundario,
+                                        size: 22,
+                                      ),
+                                    ),
+                                    if (tieneCitaPendiente)
+                                      Positioned(
+                                        top: 9,
+                                        right: 11,
+                                        child: Container(
+                                          width: 8,
+                                          height: 8,
+                                          decoration: const BoxDecoration(
+                                            color: ColoresApp.advertencia,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
                                 Container(
                                   width: 40,
                                   height: 40,

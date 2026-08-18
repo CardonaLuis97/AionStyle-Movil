@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/enrutador.dart';
@@ -28,11 +29,20 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
   final _nombreTitularCtrl = TextEditingController();
   final _vencimientoCtrl = TextEditingController();
   final _cvvCtrl = TextEditingController();
+  final List<_TarjetaVisaGuardada> _tarjetasGuardadas = [
+    const _TarjetaVisaGuardada(
+      numeroEnmascarado: '**** **** **** 4242',
+      titular: 'Usuario Demo',
+      vencimiento: '12/29',
+    ),
+  ];
   int _panelActivo = 0;
   DateTime? _fechaSeleccionada;
   TimeOfDay? _horaSeleccionada;
   MetodoPagoCita _metodoPago = MetodoPagoCita.efectivo;
   String? _corteSeleccionado;
+  int? _indiceTarjetaSeleccionada = 0;
+  bool _mostrarFormularioTarjeta = false;
 
   @override
   void dispose() {
@@ -52,14 +62,22 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
 
   bool get _pagoCompleto {
     if (_metodoPago == MetodoPagoCita.efectivo) return true;
-    final numero = _numeroTarjetaCtrl.text.replaceAll(' ', '');
-    final vencimientoValido = RegExp(r'^(0[1-9]|1[0-2])\/(\d{2})$')
-        .hasMatch(_vencimientoCtrl.text.trim());
-    final cvvValido = RegExp(r'^\d{3,4}$').hasMatch(_cvvCtrl.text.trim());
-    return numero.length >= 13 &&
-        _nombreTitularCtrl.text.trim().isNotEmpty &&
-        vencimientoValido &&
-        cvvValido;
+    return _indiceTarjetaSeleccionada != null;
+  }
+
+  bool get _puedeAgregarMasTarjetas => _tarjetasGuardadas.length < 3;
+
+  bool get _requiereFormularioTarjeta {
+    return _metodoPago == MetodoPagoCita.visa && _mostrarFormularioTarjeta;
+  }
+
+  _TarjetaVisaGuardada? get _tarjetaVisaSeleccionada {
+    if (_indiceTarjetaSeleccionada == null) return null;
+    if (_indiceTarjetaSeleccionada! < 0 ||
+        _indiceTarjetaSeleccionada! >= _tarjetasGuardadas.length) {
+      return null;
+    }
+    return _tarjetasGuardadas[_indiceTarjetaSeleccionada!];
   }
 
   Map<String, double> get _cortesConPrecio {
@@ -94,7 +112,14 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
   }
 
   String get _metodoPagoTexto {
-    return _metodoPago == MetodoPagoCita.efectivo ? 'Efectivo' : 'Visa';
+    if (_metodoPago == MetodoPagoCita.efectivo) {
+      return 'Efectivo';
+    }
+    final tarjeta = _tarjetaVisaSeleccionada;
+    if (tarjeta == null) {
+      return 'Visa';
+    }
+    return 'Visa ${tarjeta.numeroEnmascarado}';
   }
 
   List<TimeOfDay> get _horasDisponibles {
@@ -242,7 +267,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
     if (_metodoPago == MetodoPagoCita.visa && !_pagoCompleto) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Completa los datos de Visa para continuar.'),
+          content: Text('Selecciona o guarda una tarjeta Visa para continuar.'),
         ),
       );
       return;
@@ -254,6 +279,62 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
 
     context.pushReplacement(
       '${Rutas.confirmacionCita}?negocio=${Uri.encodeComponent(widget.negocioNombre)}&barbero=${Uri.encodeComponent(widget.barberoNombre)}&corte=${Uri.encodeComponent(_corteSeleccionado!)}&precio=${_precioSeleccionado.toStringAsFixed(2)}&fecha=${Uri.encodeComponent(_fechaTexto)}&hora=${Uri.encodeComponent(_horaTexto)}&pago=${Uri.encodeComponent(_metodoPagoTexto)}&qr=${Uri.encodeComponent(codigoQr)}',
+    );
+  }
+
+  void _mostrarFormularioNuevaTarjeta() {
+    if (!_puedeAgregarMasTarjetas) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ya tienes 3 tarjetas guardadas. Selecciona una.'),
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _mostrarFormularioTarjeta = true;
+      _indiceTarjetaSeleccionada = null;
+    });
+  }
+
+  void _cancelarFormularioTarjeta() {
+    setState(() {
+      _mostrarFormularioTarjeta = false;
+      if (_tarjetasGuardadas.isNotEmpty) {
+        _indiceTarjetaSeleccionada = 0;
+      }
+      _numeroTarjetaCtrl.clear();
+      _nombreTitularCtrl.clear();
+      _vencimientoCtrl.clear();
+      _cvvCtrl.clear();
+    });
+  }
+
+  void _guardarTarjetaVisa() {
+    final formValido = _formKey.currentState?.validate() ?? false;
+    if (!formValido) return;
+
+    final numeroLimpio = _numeroTarjetaCtrl.text.replaceAll(' ', '');
+    final ultimos4 = numeroLimpio.substring(numeroLimpio.length - 4);
+
+    setState(() {
+      _tarjetasGuardadas.add(
+        _TarjetaVisaGuardada(
+          numeroEnmascarado: '**** **** **** $ultimos4',
+          titular: _nombreTitularCtrl.text.trim(),
+          vencimiento: _vencimientoCtrl.text.trim(),
+        ),
+      );
+      _indiceTarjetaSeleccionada = _tarjetasGuardadas.length - 1;
+      _mostrarFormularioTarjeta = false;
+      _numeroTarjetaCtrl.clear();
+      _nombreTitularCtrl.clear();
+      _vencimientoCtrl.clear();
+      _cvvCtrl.clear();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Tarjeta guardada como metodo de pago.')),
     );
   }
 
@@ -518,104 +599,238 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
                         onSelectionChanged: (valores) {
                           setState(() {
                             _metodoPago = valores.first;
+                            if (_metodoPago == MetodoPagoCita.visa &&
+                                _tarjetasGuardadas.isEmpty) {
+                              _mostrarFormularioTarjeta = true;
+                            }
                           });
                         },
                       ),
                     ),
                   ),
                   if (_metodoPago == MetodoPagoCita.visa) ...[
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: _numeroTarjetaCtrl,
-                    keyboardType: TextInputType.number,
-                    style: tema.textTheme.bodyMedium?.copyWith(
-                      color: ColoresApp.secundario,
+                    const SizedBox(height: 10),
+                    Text(
+                      'Tarjetas Visa guardadas',
+                      style: tema.textTheme.bodySmall?.copyWith(
+                        color: ColoresApp.secundario,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    decoration: _decoracionCampoVisa(
-                      tema,
-                      'Numero de tarjeta',
-                    ),
-                    onChanged: (_) => setState(() {}),
-                    validator: (valor) {
-                      if (_metodoPago != MetodoPagoCita.visa) return null;
-                      final limpio = (valor ?? '').replaceAll(' ', '');
-                      if (limpio.length < 13) {
-                        return 'Ingresa un numero valido';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _nombreTitularCtrl,
-                    style: tema.textTheme.bodyMedium?.copyWith(
-                      color: ColoresApp.secundario,
-                    ),
-                    decoration: _decoracionCampoVisa(
-                      tema,
-                      'Nombre del titular',
-                    ),
-                    onChanged: (_) => setState(() {}),
-                    validator: (valor) {
-                      if (_metodoPago != MetodoPagoCita.visa) return null;
-                      if ((valor ?? '').trim().isEmpty) {
-                        return 'Ingresa el titular';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _vencimientoCtrl,
-                          keyboardType: TextInputType.number,
-                          style: tema.textTheme.bodyMedium?.copyWith(
-                            color: ColoresApp.secundario,
-                          ),
-                          decoration: _decoracionCampoVisa(
-                            tema,
-                            'MM/AA',
-                          ),
-                          onChanged: (_) => setState(() {}),
-                          validator: (valor) {
-                            if (_metodoPago != MetodoPagoCita.visa) return null;
-                            final v = (valor ?? '').trim();
-                            if (!RegExp(r'^(0[1-9]|1[0-2])\/(\d{2})$')
-                                .hasMatch(v)) {
-                              return 'Formato invalido';
-                            }
-                            return null;
-                          },
+                    const SizedBox(height: 8),
+                    if (_tarjetasGuardadas.isEmpty)
+                      Text(
+                        'No tienes tarjetas guardadas. Agrega una para continuar.',
+                        style: tema.textTheme.bodySmall?.copyWith(
+                          color: ColoresApp.secundario.withValues(alpha: 0.75),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _cvvCtrl,
-                          keyboardType: TextInputType.number,
-                          obscureText: true,
-                          style: tema.textTheme.bodyMedium?.copyWith(
-                            color: ColoresApp.secundario,
+                    ...List.generate(_tarjetasGuardadas.length, (index) {
+                      final tarjeta = _tarjetasGuardadas[index];
+                      final seleccionada = _indiceTarjetaSeleccionada == index;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: ColoresApp.secundario.withValues(
+                            alpha: seleccionada ? 0.2 : 0.1,
                           ),
-                          decoration: _decoracionCampoVisa(
-                            tema,
-                            'CVV',
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: ColoresApp.secundario.withValues(
+                              alpha: seleccionada ? 0.85 : 0.35,
+                            ),
                           ),
-                          onChanged: (_) => setState(() {}),
-                          validator: (valor) {
-                            if (_metodoPago != MetodoPagoCita.visa) return null;
-                            if (!RegExp(r'^\d{3,4}$')
-                                .hasMatch((valor ?? '').trim())) {
-                              return 'CVV invalido';
-                            }
-                            return null;
-                          },
                         ),
+                        child: RadioListTile<int>(
+                          value: index,
+                          groupValue: _indiceTarjetaSeleccionada,
+                          onChanged: (valor) {
+                            setState(() {
+                              _indiceTarjetaSeleccionada = valor;
+                              _mostrarFormularioTarjeta = false;
+                            });
+                          },
+                          activeColor: ColoresApp.secundario,
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                          ),
+                          title: Text(
+                            tarjeta.numeroEnmascarado,
+                            style: tema.textTheme.bodyMedium?.copyWith(
+                              color: ColoresApp.secundario,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${tarjeta.titular} · Vence ${tarjeta.vencimiento}',
+                            style: tema.textTheme.bodySmall?.copyWith(
+                              color: ColoresApp.secundario.withValues(
+                                alpha: 0.8,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                    if (_puedeAgregarMasTarjetas && !_mostrarFormularioTarjeta)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: _mostrarFormularioNuevaTarjeta,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: ColoresApp.secundario,
+                            side: BorderSide(
+                              color: ColoresApp.secundario.withValues(alpha: 0.7),
+                            ),
+                          ),
+                          icon: const Icon(Icons.add_card_outlined, size: 18),
+                          label: const Text('Anadir tarjeta'),
+                        ),
+                      ),
+                    if (!_puedeAgregarMasTarjetas)
+                      Text(
+                        'Limite alcanzado: ya guardaste 3 tarjetas Visa.',
+                        style: tema.textTheme.bodySmall?.copyWith(
+                          color: ColoresApp.secundario.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    if (_mostrarFormularioTarjeta) ...[
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _numeroTarjetaCtrl,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(16),
+                          _FormateadorNumeroTarjeta(),
+                        ],
+                        style: tema.textTheme.bodyMedium?.copyWith(
+                          color: ColoresApp.secundario,
+                        ),
+                        decoration: _decoracionCampoVisa(
+                          tema,
+                          'Numero de tarjeta',
+                        ),
+                        validator: (valor) {
+                          if (!_requiereFormularioTarjeta) return null;
+                          final limpio = (valor ?? '').replaceAll(' ', '');
+                          if (!RegExp(r'^\d{16}$').hasMatch(limpio)) {
+                            return 'Ingresa 16 digitos numericos';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _nombreTitularCtrl,
+                        textCapitalization: TextCapitalization.words,
+                        style: tema.textTheme.bodyMedium?.copyWith(
+                          color: ColoresApp.secundario,
+                        ),
+                        decoration: _decoracionCampoVisa(
+                          tema,
+                          'Nombre del titular',
+                        ),
+                        validator: (valor) {
+                          if (!_requiereFormularioTarjeta) return null;
+                          final nombre = (valor ?? '').trim();
+                          if (nombre.length < 3) {
+                            return 'Ingresa el nombre del titular';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _vencimientoCtrl,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(4),
+                                _FormateadorVencimiento(),
+                              ],
+                              style: tema.textTheme.bodyMedium?.copyWith(
+                                color: ColoresApp.secundario,
+                              ),
+                              decoration: _decoracionCampoVisa(
+                                tema,
+                                'MM/AA',
+                              ),
+                              validator: (valor) {
+                                if (!_requiereFormularioTarjeta) return null;
+                                final v = (valor ?? '').trim();
+                                if (!RegExp(r'^(0[1-9]|1[0-2])\/(\d{2})$')
+                                    .hasMatch(v)) {
+                                  return 'Formato invalido';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _cvvCtrl,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(3),
+                              ],
+                              obscureText: true,
+                              style: tema.textTheme.bodyMedium?.copyWith(
+                                color: ColoresApp.secundario,
+                              ),
+                              decoration: _decoracionCampoVisa(
+                                tema,
+                                'CVV',
+                              ),
+                              validator: (valor) {
+                                if (!_requiereFormularioTarjeta) return null;
+                                if (!RegExp(r'^\d{3}$')
+                                    .hasMatch((valor ?? '').trim())) {
+                                  return 'CVV invalido';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: _cancelarFormularioTarjeta,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: ColoresApp.secundario,
+                                side: BorderSide(
+                                  color: ColoresApp.secundario.withValues(
+                                    alpha: 0.65,
+                                  ),
+                                ),
+                              ),
+                              child: const Text('Cancelar'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: _guardarTarjetaVisa,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ColoresApp.secundario,
+                                foregroundColor: ColoresApp.primario,
+                              ),
+                              child: const Text('Guardar tarjeta'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
                   ],
                 ],
               ),
@@ -805,6 +1020,66 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: ColoresApp.error),
       ),
+    );
+  }
+}
+
+class _TarjetaVisaGuardada {
+  const _TarjetaVisaGuardada({
+    required this.numeroEnmascarado,
+    required this.titular,
+    required this.vencimiento,
+  });
+
+  final String numeroEnmascarado;
+  final String titular;
+  final String vencimiento;
+}
+
+class _FormateadorNumeroTarjeta extends TextInputFormatter {
+  const _FormateadorNumeroTarjeta();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digitos = newValue.text.replaceAll(' ', '');
+    final buffer = StringBuffer();
+    for (var i = 0; i < digitos.length; i++) {
+      buffer.write(digitos[i]);
+      if ((i + 1) % 4 == 0 && i + 1 != digitos.length) {
+        buffer.write(' ');
+      }
+    }
+    final texto = buffer.toString();
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
+    );
+  }
+}
+
+class _FormateadorVencimiento extends TextInputFormatter {
+  const _FormateadorVencimiento();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digitos = newValue.text.replaceAll('/', '');
+    if (digitos.isEmpty) {
+      return const TextEditingValue();
+    }
+
+    final texto = digitos.length <= 2
+        ? digitos
+        : '${digitos.substring(0, 2)}/${digitos.substring(2)}';
+
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
     );
   }
 }

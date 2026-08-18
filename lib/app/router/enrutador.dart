@@ -8,6 +8,11 @@ import '../../features/appointments/presentacion/paginas/pagina_citas.dart';
 import '../../features/appointments/presentacion/paginas/pagina_agendar_cita.dart';
 import '../../features/appointments/presentacion/paginas/pagina_confirmacion_cita.dart';
 import '../../features/profile/presentacion/paginas/pagina_perfil.dart';
+import '../../features/profile/presentacion/paginas/pagina_cambiar_contrasena.dart';
+import '../../features/profile/presentacion/paginas/pagina_eliminar_cuenta.dart';
+import '../../features/profile/presentacion/paginas/pagina_favoritos.dart';
+import '../../features/profile/presentacion/paginas/pagina_informacion_personal.dart';
+import '../../features/profile/presentacion/paginas/pagina_politicas_condiciones.dart';
 import '../../features/barbers/presentacion/paginas/pagina_barberos.dart';
 import '../../features/businesses/presentacion/paginas/pagina_negocios.dart';
 import '../../features/businesses/presentacion/paginas/pagina_detalle_negocio.dart';
@@ -29,6 +34,11 @@ abstract class Rutas {
   static const agendarCita = '/agendar-cita';
   static const confirmacionCita = '/confirmacion-cita';
   static const perfil = '/perfil';
+  static const perfilInformacionPersonal = '/perfil/informacion-personal';
+  static const perfilCambiarContrasena = '/perfil/cambiar-contrasena';
+  static const perfilFavoritos = '/perfil/favoritos';
+  static const perfilPoliticasCondiciones = '/perfil/politicas-condiciones';
+  static const perfilEliminarCuenta = '/perfil/eliminar-cuenta';
   static const barberos = '/barberos';
   static const negocios = '/negocios';
   static const pagos = '/pagos';
@@ -36,6 +46,21 @@ abstract class Rutas {
   static const configuracion = '/configuracion';
   static const modoBarbero = '/modo-barbero';
   static const modoPropietario = '/modo-propietario';
+
+  static const nombreInicio = 'inicio';
+  static const nombreCitas = 'citas';
+  static const nombrePerfil = 'perfil';
+  static const nombrePerfilInformacionPersonal = 'perfil-informacion-personal';
+  static const nombrePerfilCambiarContrasena = 'perfil-cambiar-contrasena';
+  static const nombrePerfilFavoritos = 'perfil-favoritos';
+  static const nombrePerfilPoliticasCondiciones = 'perfil-politicas-condiciones';
+  static const nombrePerfilEliminarCuenta = 'perfil-eliminar-cuenta';
+  static const nombrePagos = 'pagos';
+  static const nombreQr = 'qr';
+  static const nombreModoBarbero = 'modo-barbero';
+  static const nombreModoPropietario = 'modo-propietario';
+  static const nombreNegocios = 'negocios';
+  static const nombreDetalleNegocio = 'detalle-negocio';
 }
 
 final enrutadorProvider = Provider<GoRouter>((ref) {
@@ -60,10 +85,12 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: Rutas.inicio,
+            name: Rutas.nombreInicio,
             builder: (context, state) => const PaginaInicio(),
           ),
           GoRoute(
             path: Rutas.citas,
+            name: Rutas.nombreCitas,
             builder: (context, state) {
               final p = state.uri.queryParameters;
               return PaginaCitas(
@@ -114,7 +141,33 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: Rutas.perfil,
+            name: Rutas.nombrePerfil,
             builder: (context, state) => const PaginaPerfil(),
+          ),
+          GoRoute(
+            path: Rutas.perfilInformacionPersonal,
+            name: Rutas.nombrePerfilInformacionPersonal,
+            builder: (context, state) => const PaginaInformacionPersonal(),
+          ),
+          GoRoute(
+            path: Rutas.perfilCambiarContrasena,
+            name: Rutas.nombrePerfilCambiarContrasena,
+            builder: (context, state) => const PaginaCambiarContrasena(),
+          ),
+          GoRoute(
+            path: Rutas.perfilFavoritos,
+            name: Rutas.nombrePerfilFavoritos,
+            builder: (context, state) => const PaginaFavoritos(),
+          ),
+          GoRoute(
+            path: Rutas.perfilPoliticasCondiciones,
+            name: Rutas.nombrePerfilPoliticasCondiciones,
+            builder: (context, state) => const PaginaPoliticasCondiciones(),
+          ),
+          GoRoute(
+            path: Rutas.perfilEliminarCuenta,
+            name: Rutas.nombrePerfilEliminarCuenta,
+            builder: (context, state) => const PaginaEliminarCuenta(),
           ),
           GoRoute(
             path: Rutas.barberos,
@@ -122,20 +175,24 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: Rutas.negocios,
+            name: Rutas.nombreNegocios,
             builder: (context, state) => const PaginaNegocios(),
           ),
           GoRoute(
             path: '${Rutas.negocios}/:id',
+            name: Rutas.nombreDetalleNegocio,
             builder: (context, state) => PaginaDetalleNegocio(
               negocioId: state.pathParameters['id'] ?? '',
             ),
           ),
           GoRoute(
             path: Rutas.pagos,
+            name: Rutas.nombrePagos,
             builder: (context, state) => const PaginaPagos(),
           ),
           GoRoute(
             path: Rutas.qr,
+            name: Rutas.nombreQr,
             builder: (context, state) => const PaginaQr(),
           ),
           GoRoute(
@@ -144,10 +201,12 @@ final enrutadorProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: Rutas.modoBarbero,
+            name: Rutas.nombreModoBarbero,
             builder: (context, state) => const PaginaModoBarbero(),
           ),
           GoRoute(
             path: Rutas.modoPropietario,
+            name: Rutas.nombreModoPropietario,
             builder: (context, state) => const PaginaModoPropietario(),
           ),
         ],
