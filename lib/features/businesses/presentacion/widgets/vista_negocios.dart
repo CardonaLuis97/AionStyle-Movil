@@ -13,12 +13,16 @@ class VistaNegocios extends StatefulWidget {
     this.mostrarEncabezado = true,
     this.mostrarBuscador = true,
     this.busquedaExterna = '',
+    this.textoDebajoCategorias,
+    this.colorTextoDebajoCategorias,
   });
 
   final String titulo;
   final bool mostrarEncabezado;
   final bool mostrarBuscador;
   final String busquedaExterna;
+  final String? textoDebajoCategorias;
+  final Color? colorTextoDebajoCategorias;
 
   @override
   State<VistaNegocios> createState() => _VistaNegociosState();
@@ -88,6 +92,18 @@ class _VistaNegociosState extends State<VistaNegocios> {
             const SizedBox(height: 14),
           ],
           _buildSelectorCategoria(tema),
+          if (widget.textoDebajoCategorias != null &&
+              widget.textoDebajoCategorias!.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              widget.textoDebajoCategorias!,
+              style: tema.textTheme.titleSmall?.copyWith(
+                color:
+                    widget.colorTextoDebajoCategorias ?? ColoresApp.primario,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
           if (widget.mostrarBuscador) ...[
             const SizedBox(height: 12),
             _buildBuscador(tema),

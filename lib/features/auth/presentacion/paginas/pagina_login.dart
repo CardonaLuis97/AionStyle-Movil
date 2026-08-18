@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../../../app/theme/colores.dart';
 import '../../../../app/router/enrutador.dart';
 import '../../../../app/widgets/logo_aionstyle.dart';
+import '../../../../core/utils/ubicacion_obligatoria.dart';
 import '../modelos_vista/estado_auth.dart';
 import '../proveedores/proveedores_auth.dart';
 import '../widgets/campo_email.dart';
@@ -25,6 +26,7 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
   final _emailCtrl = TextEditingController();
   final _contrasenaCtrl = TextEditingController();
   String? _versionApp;
+  bool _redirigiendoInicio = false;
 
   String get _textoVersion {
     if (_versionApp == null || _versionApp!.isEmpty) return '';
@@ -71,7 +73,16 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
 
     ref.listen<EstadoAuth>(viewModelAuthProvider, (_, siguiente) {
       siguiente.maybeWhen(
-        autenticado: (_) => context.go(Rutas.inicio),
+        autenticado: (_) async {
+          if (_redirigiendoInicio) return;
+          _redirigiendoInicio = true;
+          final permitido = await exigirUbicacionAntesDeInicio(context);
+          if (!mounted) return;
+          if (permitido) {
+            context.go(Rutas.inicio);
+          }
+          _redirigiendoInicio = false;
+        },
         perfilIncompleto: (_) => context.go(Rutas.completarPerfil),
         error: (msg) => ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg))),

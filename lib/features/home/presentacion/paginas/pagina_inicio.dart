@@ -14,15 +14,7 @@ class PaginaInicio extends ConsumerStatefulWidget {
 
 class _PaginaInicioState extends ConsumerState<PaginaInicio> {
   final TextEditingController _busquedaCtrl = TextEditingController();
-
-  void _mostrarNotificacionCita(BuildContext context, bool tienePendiente) {
-    final mensaje = tienePendiente
-        ? 'Tienes un corte pendiente. Acercate a la barberia para no perder tu turno.'
-        : 'No tienes citas pendientes por ahora.';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensaje)),
-    );
-  }
+  bool _notificacionesLimpias = false;
 
   @override
   void dispose() {
@@ -98,7 +90,8 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                             final esUsuarioDemoCliente =
                                 usuario.correo.trim().toLowerCase() ==
                                     'usuarioa@aionstyle.com';
-                            final tieneCitaPendiente = esUsuarioDemoCliente;
+                            final tieneCitaPendiente =
+                              esUsuarioDemoCliente && !_notificacionesLimpias;
                             final rolPrincipal = esUsuarioDemoCliente
                                 ? 'Cliente'
                                 : (usuario.roles.isNotEmpty
@@ -144,16 +137,98 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                                 Stack(
                                   clipBehavior: Clip.none,
                                   children: [
-                                    IconButton(
-                                      onPressed: () => _mostrarNotificacionCita(
-                                        context,
-                                        tieneCitaPendiente,
-                                      ),
+                                    PopupMenuButton<int>(
                                       tooltip: 'Notificaciones',
-                                      icon: const Icon(
-                                        Icons.notifications_none_rounded,
-                                        color: ColoresApp.secundario,
-                                        size: 22,
+                                      offset: const Offset(0, 42),
+                                      color: ColoresApp.secundario,
+                                      onSelected: (valor) {
+                                        if (valor == 1) {
+                                          setState(() {
+                                            _notificacionesLimpias = true;
+                                          });
+                                        }
+                                      },
+                                      itemBuilder: (_) {
+                                        return [
+                                          PopupMenuItem<int>(
+                                            value: 0,
+                                            enabled: false,
+                                            child: SizedBox(
+                                              width: 260,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    tieneCitaPendiente
+                                                        ? 'Corte pendiente'
+                                                        : 'Sin novedades',
+                                                    style: tema
+                                                        .textTheme
+                                                        .titleSmall
+                                                        ?.copyWith(
+                                                          color: ColoresApp
+                                                              .primario,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Text(
+                                                    tieneCitaPendiente
+                                                        ? 'Tienes un corte pendiente. Ya deberias acercarte a la barberia para no perder tu turno.'
+                                                        : 'No tienes citas pendientes por ahora.',
+                                                    style: tema
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.copyWith(
+                                                          color:
+                                                              ColoresApp.texto,
+                                                          height: 1.3,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          if (tieneCitaPendiente)
+                                            const PopupMenuDivider(),
+                                          if (tieneCitaPendiente)
+                                            PopupMenuItem<int>(
+                                              value: 1,
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.cleaning_services_outlined,
+                                                    color: ColoresApp.primario,
+                                                    size: 18,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    'Limpiar notificaciones',
+                                                    style: tema
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.copyWith(
+                                                          color: ColoresApp
+                                                              .primario,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                        ];
+                                      },
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(8),
+                                        child: Icon(
+                                          Icons.notifications_none_rounded,
+                                          color: ColoresApp.secundario,
+                                          size: 22,
+                                        ),
                                       ),
                                     ),
                                     if (tieneCitaPendiente)
@@ -246,10 +321,13 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                 ),
                 Expanded(
                   child: VistaNegocios(
-                    titulo: 'Descubre negocios cerca de ti',
+                    titulo: '',
                     mostrarEncabezado: false,
                     mostrarBuscador: false,
                     busquedaExterna: _busquedaCtrl.text,
+                    textoDebajoCategorias:
+                        'Negocios cercanos a ti en estos momentos',
+                    colorTextoDebajoCategorias: ColoresApp.terceario,
                   ),
                 ),
               ],

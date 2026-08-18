@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/enrutador.dart';
 import '../../../../app/theme/colores.dart';
+import '../../../../core/utils/ubicacion_obligatoria.dart';
 import '../../dominio/entidades/tipo_documento.dart';
 import '../modelos_vista/estado_auth.dart';
 import '../proveedores/proveedores_auth.dart';
@@ -25,6 +26,7 @@ class _PaginaRegistroState extends ConsumerState<PaginaRegistro> {
   final _contrasenaCtrl = TextEditingController();
   final _confirmarCtrl = TextEditingController();
   TipoDocumento _tipoDocumento = TipoDocumento.dni;
+  bool _redirigiendoInicio = false;
 
   @override
   void dispose() {
@@ -55,7 +57,16 @@ class _PaginaRegistroState extends ConsumerState<PaginaRegistro> {
 
     ref.listen<EstadoAuth>(viewModelAuthProvider, (_, siguiente) {
       siguiente.maybeWhen(
-        autenticado: (_) => context.go(Rutas.inicio),
+        autenticado: (_) async {
+          if (_redirigiendoInicio) return;
+          _redirigiendoInicio = true;
+          final permitido = await exigirUbicacionAntesDeInicio(context);
+          if (!mounted) return;
+          if (permitido) {
+            context.go(Rutas.inicio);
+          }
+          _redirigiendoInicio = false;
+        },
         error: (msg) => ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg))),
         orElse: () {},
