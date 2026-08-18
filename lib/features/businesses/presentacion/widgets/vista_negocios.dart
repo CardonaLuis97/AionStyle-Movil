@@ -94,13 +94,15 @@ class _VistaNegociosState extends State<VistaNegocios> {
           _buildSelectorCategoria(tema),
           if (widget.textoDebajoCategorias != null &&
               widget.textoDebajoCategorias!.trim().isNotEmpty) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             Text(
               widget.textoDebajoCategorias!,
-              style: tema.textTheme.titleSmall?.copyWith(
+              style: tema.textTheme.bodyMedium?.copyWith(
                 color:
                     widget.colorTextoDebajoCategorias ?? ColoresApp.primario,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
+                fontSize: 12.5,
+                height: 1.1,
               ),
             ),
           ],

@@ -140,7 +140,7 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                                     PopupMenuButton<int>(
                                       tooltip: 'Notificaciones',
                                       offset: const Offset(0, 42),
-                                      color: ColoresApp.secundario,
+                                      color: ColoresApp.terceario,
                                       onSelected: (valor) {
                                         if (valor == 1) {
                                           setState(() {
@@ -160,6 +160,45 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                                                     CrossAxisAlignment.start,
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: (tieneCitaPendiente
+                                                              ? ColoresApp.advertencia
+                                                              : ColoresApp.acento)
+                                                          .withValues(alpha: 0.24),
+                                                      borderRadius:
+                                                          BorderRadius.circular(999),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Icon(
+                                                          tieneCitaPendiente
+                                                              ? Icons.notifications_active_rounded
+                                                              : Icons.notifications_none_rounded,
+                                                          size: 14,
+                                                          color: ColoresApp.primario,
+                                                        ),
+                                                        const SizedBox(width: 5),
+                                                        Text(
+                                                          'Notificaciones',
+                                                          style: tema
+                                                              .textTheme
+                                                              .labelSmall
+                                                              ?.copyWith(
+                                                                color: ColoresApp.primario,
+                                                                fontWeight:
+                                                                    FontWeight.w700,
+                                                              ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
                                                   Text(
                                                     tieneCitaPendiente
                                                         ? 'Corte pendiente'
@@ -183,8 +222,9 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                                                         .textTheme
                                                         .bodySmall
                                                         ?.copyWith(
-                                                          color:
-                                                              ColoresApp.texto,
+                                                          color: ColoresApp
+                                                              .primario
+                                                              .withValues(alpha: 0.85),
                                                           height: 1.3,
                                                         ),
                                                   ),
@@ -202,19 +242,19 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                                                   const Icon(
                                                     Icons.cleaning_services_outlined,
                                                     color: ColoresApp.primario,
-                                                    size: 18,
+                                                    size: 16,
                                                   ),
-                                                  const SizedBox(width: 8),
+                                                  const SizedBox(width: 6),
                                                   Text(
-                                                    'Limpiar notificaciones',
+                                                    'Limpiar',
                                                     style: tema
                                                         .textTheme
-                                                        .bodyMedium
+                                                        .bodySmall
                                                         ?.copyWith(
                                                           color: ColoresApp
                                                               .primario,
                                                           fontWeight:
-                                                              FontWeight.w600,
+                                                              FontWeight.w500,
                                                         ),
                                                   ),
                                                 ],
@@ -225,8 +265,8 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                                       child: const Padding(
                                         padding: EdgeInsets.all(8),
                                         child: Icon(
-                                          Icons.notifications_none_rounded,
-                                          color: ColoresApp.secundario,
+                                          Icons.notifications_rounded,
+                                          color: ColoresApp.acento,
                                           size: 22,
                                         ),
                                       ),
@@ -327,7 +367,7 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                     busquedaExterna: _busquedaCtrl.text,
                     textoDebajoCategorias:
                         'Negocios cercanos a ti en estos momentos',
-                    colorTextoDebajoCategorias: ColoresApp.terceario,
+                    colorTextoDebajoCategorias: ColoresApp.textoClaro,
                   ),
                 ),
               ],

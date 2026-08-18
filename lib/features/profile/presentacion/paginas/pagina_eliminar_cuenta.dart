@@ -213,16 +213,26 @@ class _DialogoConfirmarEliminacionState
     final bloqueoActivo = _segundosRestantes > 0;
     return AlertDialog(
       backgroundColor: ColoresApp.terceario,
-      title: const Text('Eliminar cuenta'),
+      title: Text(
+        'Eliminar cuenta',
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: ColoresApp.primario,
+              fontWeight: FontWeight.w700,
+            ),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Estas seguro de eliminar la cuenta?\n\n'
             'Esta accion deshabilitara tu cuenta por 30 dias. Durante este plazo '
             'puedes ingresar para reactivarla. Despues de ese plazo, tus datos '
             'se eliminaran completamente.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: ColoresApp.primario,
+                  height: 1.3,
+                ),
           ),
           const SizedBox(height: 12),
           Text(
@@ -247,7 +257,7 @@ class _DialogoConfirmarEliminacionState
               bloqueoActivo ? null : () => Navigator.of(context).pop(true),
           style: ElevatedButton.styleFrom(
             backgroundColor: ColoresApp.error,
-            foregroundColor: ColoresApp.secundario,
+            foregroundColor: ColoresApp.primario,
           ),
           child: Text(
             bloqueoActivo ? 'Confirmar ($_segundosRestantes)' : 'Confirmar',

@@ -121,7 +121,6 @@ class PaginaPerfil extends ConsumerWidget {
                     titulo: 'ELIMINAR CUENTA',
                     subtitulo: 'Solicita la baja definitiva de tu cuenta',
                     icono: Icons.delete_outline,
-                    color: ColoresApp.error,
                     onTap: () =>
                         context.pushNamed(Rutas.nombrePerfilEliminarCuenta),
                   ),
