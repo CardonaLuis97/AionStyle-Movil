@@ -119,10 +119,18 @@ class RepositorioAuthImpl implements RepositorioAuth {
       await fuenteLocal.cerrarSesion();
       await almacenamiento.eliminar(ConstantesApp.claveTokenAcceso);
       await almacenamiento.eliminar(ConstantesApp.claveTokenRefresco);
-      await googleSignIn.signOut();
+      // En web o sin sesion Google activa, signOut puede fallar y no debe
+      // impedir el cierre de sesion local.
+      try {
+        await googleSignIn.signOut();
+      } catch (_) {
+        // Ignorado intencionalmente.
+      }
       return const Right(null);
     } on ExcepcionServidor catch (e) {
       return Left(FalloServidor(e.mensaje));
+    } catch (_) {
+      return const Right(null);
     }
   }
 

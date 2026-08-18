@@ -160,45 +160,58 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                                                     CrossAxisAlignment.start,
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 4,
-                                                    ),
-                                                    decoration: BoxDecoration(
-                                                      color: (tieneCitaPendiente
-                                                              ? ColoresApp.advertencia
-                                                              : ColoresApp.acento)
-                                                          .withValues(alpha: 0.24),
-                                                      borderRadius:
-                                                          BorderRadius.circular(999),
-                                                    ),
-                                                    child: Row(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      children: [
-                                                        Icon(
-                                                          tieneCitaPendiente
-                                                              ? Icons.notifications_active_rounded
-                                                              : Icons.notifications_none_rounded,
-                                                          size: 14,
-                                                          color: ColoresApp.primario,
-                                                        ),
-                                                        const SizedBox(width: 5),
-                                                        Text(
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(
                                                           'Notificaciones',
                                                           style: tema
                                                               .textTheme
-                                                              .labelSmall
+                                                              .labelLarge
                                                               ?.copyWith(
                                                                 color: ColoresApp.primario,
                                                                 fontWeight:
                                                                     FontWeight.w700,
                                                               ),
                                                         ),
-                                                      ],
-                                                    ),
+                                                      ),
+                                                      if (tieneCitaPendiente)
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop();
+                                                            setState(() {
+                                                              _notificacionesLimpias =
+                                                                  true;
+                                                            });
+                                                          },
+                                                          style: TextButton.styleFrom(
+                                                            foregroundColor:
+                                                                ColoresApp.primario,
+                                                            padding:
+                                                                const EdgeInsets.symmetric(
+                                                              horizontal: 6,
+                                                              vertical: 2,
+                                                            ),
+                                                            minimumSize:
+                                                                const Size(0, 24),
+                                                            tapTargetSize:
+                                                                MaterialTapTargetSize
+                                                                    .shrinkWrap,
+                                                          ),
+                                                          child: Text(
+                                                            'Limpiar',
+                                                            style: tema
+                                                                .textTheme
+                                                                .labelSmall
+                                                                ?.copyWith(
+                                                                  fontWeight:
+                                                                      FontWeight.w500,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                    ],
                                                   ),
-                                                  const SizedBox(height: 8),
+                                                  const SizedBox(height: 6),
                                                   Text(
                                                     tieneCitaPendiente
                                                         ? 'Corte pendiente'
@@ -232,34 +245,6 @@ class _PaginaInicioState extends ConsumerState<PaginaInicio> {
                                               ),
                                             ),
                                           ),
-                                          if (tieneCitaPendiente)
-                                            const PopupMenuDivider(),
-                                          if (tieneCitaPendiente)
-                                            PopupMenuItem<int>(
-                                              value: 1,
-                                              child: Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.cleaning_services_outlined,
-                                                    color: ColoresApp.primario,
-                                                    size: 16,
-                                                  ),
-                                                  const SizedBox(width: 6),
-                                                  Text(
-                                                    'Limpiar',
-                                                    style: tema
-                                                        .textTheme
-                                                        .bodySmall
-                                                        ?.copyWith(
-                                                          color: ColoresApp
-                                                              .primario,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
                                         ];
                                       },
                                       child: const Padding(

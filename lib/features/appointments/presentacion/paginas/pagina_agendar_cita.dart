@@ -379,6 +379,7 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: _corteSeleccionado,
+                    isExpanded: true,
                     style: tema.textTheme.bodyMedium?.copyWith(
                       color: ColoresApp.secundario,
                     ),
@@ -415,9 +416,23 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
                         value: entrada.key,
                         child: Text(
                           '${entrada.key} - USD ${entrada.value.toStringAsFixed(2)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       );
                     }).toList(),
+                    selectedItemBuilder: (context) {
+                      return _cortesConPrecio.entries.map((entrada) {
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '${entrada.key} - USD ${entrada.value.toStringAsFixed(2)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList();
+                    },
                     onChanged: (valor) {
                       setState(() {
                         _corteSeleccionado = valor;
@@ -630,43 +645,46 @@ class _PaginaAgendarCitaState extends State<PaginaAgendarCita> {
                       final seleccionada = _indiceTarjetaSeleccionada == index;
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
+                        child: Material(
                           color: ColoresApp.secundario.withValues(
                             alpha: seleccionada ? 0.2 : 0.1,
                           ),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: ColoresApp.secundario.withValues(
-                              alpha: seleccionada ? 0.85 : 0.35,
-                            ),
-                          ),
-                        ),
-                        child: RadioListTile<int>(
-                          value: index,
-                          groupValue: _indiceTarjetaSeleccionada,
-                          onChanged: (valor) {
-                            setState(() {
-                              _indiceTarjetaSeleccionada = valor;
-                              _mostrarFormularioTarjeta = false;
-                            });
-                          },
-                          activeColor: ColoresApp.secundario,
-                          dense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                          ),
-                          title: Text(
-                            tarjeta.numeroEnmascarado,
-                            style: tema.textTheme.bodyMedium?.copyWith(
-                              color: ColoresApp.secundario,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          subtitle: Text(
-                            '${tarjeta.titular} · Vence ${tarjeta.vencimiento}',
-                            style: tema.textTheme.bodySmall?.copyWith(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
                               color: ColoresApp.secundario.withValues(
-                                alpha: 0.8,
+                                alpha: seleccionada ? 0.85 : 0.35,
+                              ),
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: RadioListTile<int>(
+                            value: index,
+                            groupValue: _indiceTarjetaSeleccionada,
+                            onChanged: (valor) {
+                              setState(() {
+                                _indiceTarjetaSeleccionada = valor;
+                                _mostrarFormularioTarjeta = false;
+                              });
+                            },
+                            activeColor: ColoresApp.secundario,
+                            dense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                            ),
+                            title: Text(
+                              tarjeta.numeroEnmascarado,
+                              style: tema.textTheme.bodyMedium?.copyWith(
+                                color: ColoresApp.secundario,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            subtitle: Text(
+                              '${tarjeta.titular} · Vence ${tarjeta.vencimiento}',
+                              style: tema.textTheme.bodySmall?.copyWith(
+                                color: ColoresApp.secundario.withValues(
+                                  alpha: 0.8,
+                                ),
                               ),
                             ),
                           ),

@@ -118,8 +118,8 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                   ),
                   Column(
                     children: [
-                      const SizedBox(height: 24),
-                      const LogoAionStyle(ancho: 420, alto: 248),
+                      const SizedBox(height: 50),
+                      const LogoAionStyle(ancho: 360, alto: 180),
                       const SizedBox(height: 8),
                       Center(
                         child: Container(
@@ -238,12 +238,12 @@ class _PaginaLoginState extends ConsumerState<PaginaLogin> {
                                           tema.textTheme.titleMedium?.copyWith(
                                         color: ColoresApp.primario,
                                         fontStyle: FontStyle.italic,
-                                        fontSize: 19,
+                                        fontSize: 14,
                                       ),
                                       children: const [
-                                        TextSpan(text: 'No tienes cuenta '),
+                                        TextSpan(text: 'No tienes cuenta? '),
                                         TextSpan(
-                                          text: 'Regístrate',
+                                          text: 'Regístrate aquí',
                                           style: TextStyle(
                                             fontWeight: FontWeight.w600,
                                           ),
